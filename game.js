@@ -438,7 +438,7 @@ function drawStory(){const sc=STORY.scene,lt=STORY.t-sc*STORY.dur,t=STORY.t;cons
   drawVeh(cx,bx+2.5*cs,by+bh*.85-(lt>3?(lt-3)*bh*.4:0),cs*1.1,'E',-Math.PI/2,{t,siren:true,lights:true,sq:Math.sin(t*20)*.02});}
  cx.restore();}
 // ---------- Input ----------
-cv.addEventListener('pointerdown',e=>{AU.init();if(MODE!=='game'||!G)return;const x=Math.floor((e.clientX-G.bx)/G.cs),y=Math.floor((e.clientY-G.by)/G.cs);if(x<0||y<0||x>=G.L.w||y>=G.L.h)return;tapCell(x,y);updHUD();});
+cv.addEventListener('pointerdown',e=>{AU.init();if(MODE!=='game'||!G)return;const pk=window.pickCell&&window.pickCell(e.clientX,e.clientY);const x=pk?pk[0]:Math.floor((e.clientX-G.bx)/G.cs),y=pk?pk[1]:Math.floor((e.clientY-G.by)/G.cs);if(x<0||y<0||x>=G.L.w||y>=G.L.h)return;tapCell(x,y);updHUD();});
 $('bHome').onclick=()=>{AU.click();showMap();};$('bHint').onclick=()=>{AU.click();useHelp('hint');};$('bUndo').onclick=()=>{AU.click();useHelp('undo');};$('bHeart').onclick=()=>{AU.click();useHelp('heart');};$('bSkip').onclick=()=>{AU.click();endStory();};
 document.addEventListener('visibilitychange',()=>{if(!AU.ac)return;if(document.hidden)AU.ac.suspend();else AU.ac.resume();});
 // ---------- Loop ----------
