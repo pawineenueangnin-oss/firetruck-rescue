@@ -35,11 +35,19 @@ function spr(name,px){const sk=skinFor(name);const key=name+'|'+px+'|'+sk;let e=
 const LB={E:[.316,.089],K:[.378,.089],T:[.33,.089],A:[.31,.08],V:[.18,.076],P:[-.03,.068],C:[-.02,.072],W:[.06,.08]};
 const FRONT={E:.43,K:.48,T:.44,A:.43,V:.35,P:.33,C:.34,W:.42};
 const AMBER={A:0,V:1,W:1};
-function drawTD(c,name,x,y,s,ang,o){o=o||{};const k=s/(CELLU*TD.scale);const dw=TD.FS*k;const dpr=Math.max(DPR,o.dpr||1);let px=Math.ceil(dw*dpr/8)*8;px=clamp(px,16,TD.FS);
+const BB={};let bbDone=false;
+function calcBB(){const im=IMG('sprites/td.webp');if(bbDone||!ok(im))return;bbDone=true;const FS=TD.FS,cv2=document.createElement('canvas');cv2.width=FS;cv2.height=FS;const g=cv2.getContext('2d',{willReadFrequently:true});
+ for(const n in TD.idx){const i=TD.idx[n];g.clearRect(0,0,FS,FS);g.drawImage(im,(i%TD.C)*FS,Math.floor(i/TD.C)*FS,FS,FS,0,0,FS,FS);const d=g.getImageData(0,0,FS,FS).data;let x0=FS,x1=-1,y0=FS,y1=-1;
+  for(let y=0;y<FS;y+=2)for(let x=0;x<FS;x+=2)if(d[(y*FS+x)*4+3]>40){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}
+  if(x1>0)BB[n]={L:x1-x0+2,Wd:y1-y0+2,cx:(x0+x1)/2-TD.anchor[0],cy:(y0+y1)/2-TD.anchor[1]};}}
+const FITL=.9,FITW=.66;const isVehName=n=>/^([EKTA]\d|[VPCW]|car\d)$/.test(n);
+function fitOf(n){calcBB();const b=BB[n];if(!b||!isVehName(n))return null;const base=CELLU*TD.scale;return {f:Math.min(FITL*base/b.L,FITW*base/b.Wd),b};}
+window.__fitOf=fitOf;
+function drawTD(c,name,x,y,s,ang,o){o=o||{};const FT=o.fit!==false?fitOf(name):null;if(FT)s*=FT.f;const k=s/(CELLU*TD.scale);const dw=TD.FS*k;const dpr=Math.max(DPR,o.dpr||1);let px=Math.ceil(dw*dpr/8)*8;px=clamp(px,16,TD.FS);
  const e=spr(name,px);if(!e)return false;const ax=TD.anchor[0]*k,ay=TD.anchor[1]*k;
- if(o.shadow!==false){c.save();c.translate(x+s*.05,y+s*.085);c.rotate(ang);c.drawImage(e.sh,-ax,-ay,dw,dw);c.restore();}
- c.save();c.translate(x,y-(o.z||0));c.rotate(ang+(o.wob?Math.sin((o.t||TT)*40)*o.wob*.25:0));const sq=o.sq||0;if(sq)c.scale(1-sq*.3,1+sq*.25);c.drawImage(e.c,-ax,-ay,dw,dw);c.restore();return true;}
-window.drawVeh=function(c,x,y,s,type,ang,o){o=o||{};const t=o.t!=null?o.t:TT;const k=s/(CELLU*TD.scale)*TD.scale;// px per model unit
+ if(o.shadow!==false){c.save();c.translate(x+s*.05,y+s*.085);c.rotate(ang);c.drawImage(e.sh,-ax-(FT?FT.b.cx*k:0),-ay-(FT?FT.b.cy*k:0),dw,dw);c.restore();}
+ c.save();c.translate(x,y-(o.z||0));c.rotate(ang+(o.wob?Math.sin((o.t||TT)*40)*o.wob*.25:0));const sq=o.sq||0;if(sq)c.scale(1-sq*.3,1+sq*.25);c.drawImage(e.c,-ax-(FT?FT.b.cx*k:0),-ay-(FT?FT.b.cy*k:0),dw,dw);c.restore();return true;}
+window.drawVeh=function(c,x,y,s,type,ang,o){o=Object.assign({},o||{});{const FT=fitOf(sname(type));if(FT){s*=FT.f;const k0=s/(CELLU*TD.scale),cs_=Math.cos(ang),sn_=Math.sin(ang);x-=(FT.b.cx*cs_-FT.b.cy*sn_)*k0;y-=(FT.b.cx*sn_+FT.b.cy*cs_)*k0;}o.fit=false;}const t=o.t!=null?o.t:TT;const k=s/(CELLU*TD.scale)*TD.scale;// px per model unit
  const ca=Math.cos(ang),sa=Math.sin(ang);const W2=(lx,lz)=>[x+ca*lx*k-sa*lz*k,y+sa*lx*k+ca*lz*k];
  if(o.lights&&o.cone!==false&&!LOW()){const f=FRONT[type]||.4;const L=s*1.5,sw=s*.42;const [ax1,ay1]=W2(f,-.12),[ax2,ay2]=W2(f,.12);const [fx,fy]=W2(f,0);c.save();c.globalCompositeOperation='lighter';
   const g=c.createLinearGradient(fx,fy,fx+ca*L,fy+sa*L);g.addColorStop(0,'rgba(255,246,210,.36)');g.addColorStop(1,'rgba(255,246,210,0)');c.fillStyle=g;
@@ -56,13 +64,14 @@ window.drawBarrier=function(c,x,y,s,j){drawTD(c,'bar',x+(j?Math.sin(j*40)*3*j:0)
 window.drawHydrant=function(c,x,y,s,t){const p=.5+.5*Math.sin((t||0)*4);c.save();c.globalCompositeOperation='lighter';const g=c.createRadialGradient(x,y,0,x,y,s*.5);g.addColorStop(0,`rgba(90,190,255,${.22+p*.14})`);g.addColorStop(1,'rgba(90,190,255,0)');c.fillStyle=g;c.fillRect(x-s*.5,y-s*.5,s,s);c.restore();drawTD(c,'hyd',x,y,s*1.55,0,{});};
 // 3/4 turntable sprite (garage, scene strip, result lineup)
 const _veh3q=window.__v2drawVeh||null;
-function drawTT(c,type,tier,x,y,s,ang,o){o=o||{};const im=ttImg();const key=type+tier;const row=TQ.rows[key];if(row==null||!ok(im))return false;const N=TQ.N,FS=TQ.FS;
- let a=((ang%TAU)+TAU)%TAU;const f=a/(TAU/N);const f0=Math.floor(f)%N,f1=(f0+1)%N,u=f-Math.floor(f);const k=s/(CELLU*TQ.scale),ax=TQ.anchor[0]*k,ay=TQ.anchor[1]*k;
+function drawTT(c,type,tier,x,y,s,ang,o){o=o||{};let im=ttImg();const key=type+tier;let row=TQ.rows[key];if(row==null)return false;const N=TQ.N;let FS=TQ.FS,R=1;
+ const devPx=s*(o.dpr||DPR)*1.6;if(o.hd||devPx>FS){const h=IMG('sprites/hd/'+key+'.webp');if(ok(h)){im=h;row=0;R=448/TQ.FS;FS=448;}}if(!ok(im))return false;
+ let a=((ang%TAU)+TAU)%TAU;const f=a/(TAU/N);const f0=Math.floor(f)%N,f1=(f0+1)%N,u=f-Math.floor(f);const k=s/(CELLU*TQ.scale*R),ax=TQ.anchor[0]*R*k,ay=TQ.anchor[1]*R*k;
  c.save();if(o.filter&&o.filter!=='none')c.filter=o.filter;if(o.alpha!=null)c.globalAlpha=o.alpha;
  if(o.smooth&&u>.86){const u2=(u-.86)/.14;c.globalAlpha=(o.alpha??1);c.drawImage(im,f0*FS,row*FS,FS,FS,x-ax,y-ay,FS*k,FS*k);c.globalAlpha=(o.alpha??1)*u2;c.drawImage(im,f1*FS,row*FS,FS,FS,x-ax,y-ay,FS*k,FS*k);}
  else{const fi=(o.smooth?f0:Math.round(f))%N;c.drawImage(im,fi*FS,row*FS,FS,FS,x-ax,y-ay,FS*k,FS*k);}c.restore();
  if(o.siren){const fi=(o.smooth&&u<=.86?f0:Math.round(f))%N;const lb=(TQ.lb[key]||[])[fi]||[];const t=o.t||TT;const ph=Math.floor(t*8+(o.ph||0))%2;c.save();c.globalCompositeOperation='lighter';
-  lb.forEach((p,i)=>{const px=x+(p[0]-TQ.anchor[0])*k,py=y+(p[1]-TQ.anchor[1])*k;const col=i===0?'255,40,30':'40,110,255';const on=i===ph;const r=s*(on?.38:.1);const g=c.createRadialGradient(px,py,0,px,py,r);g.addColorStop(0,`rgba(255,255,255,${on?.95:.5})`);g.addColorStop(.15,`rgba(${col},${on?.8:.4})`);g.addColorStop(1,`rgba(${col},0)`);c.fillStyle=g;c.fillRect(px-r,py-r,r*2,r*2);});c.restore();}
+  lb.forEach((p,i)=>{const px=x+(p[0]-TQ.anchor[0])*R*k,py=y+(p[1]-TQ.anchor[1])*R*k;const col=i===0?'255,40,30':'40,110,255';const on=i===ph;const r=s*(on?.38:.1);const g=c.createRadialGradient(px,py,0,px,py,r);g.addColorStop(0,`rgba(255,255,255,${on?.95:.5})`);g.addColorStop(.15,`rgba(${col},${on?.8:.4})`);g.addColorStop(1,`rgba(${col},0)`);c.fillStyle=g;c.fillRect(px-r,py-r,r*2,r*2);});c.restore();}
  return true;}
 window.drawTT=drawTT;
 // ---------- Street board (top-down city asphalt) ----------
@@ -343,7 +352,7 @@ function showGarage(back){const el=ovEl('gar');el.className='ov3 gar';el.style.d
    c.save();c.globalCompositeOperation='lighter';const sp=c.createRadialGradient(w/2,fy,0,w/2,fy,w*.45);sp.addColorStop(0,'rgba(255,240,210,.28)');sp.addColorStop(1,'rgba(255,240,210,0)');c.fillStyle=sp;c.save();c.translate(w/2,fy);c.scale(1,.32);c.translate(-w/2,-fy);c.fillRect(0,fy-w*.45,w,w*.9);c.restore();
    const cone=c.createLinearGradient(0,0,0,fy);cone.addColorStop(0,'rgba(255,240,210,.18)');cone.addColorStop(1,'rgba(255,240,210,0)');c.fillStyle=cone;c.beginPath();c.moveTo(w*.44,0);c.lineTo(w*.56,0);c.lineTo(w*.85,fy);c.lineTo(w*.15,fy);c.fill();c.restore();
    const vs=Math.min(w*.4,h*.55);c.save();c.fillStyle='rgba(0,0,0,.55)';c.filter=LOW()?'none':'blur(6px)';c.beginPath();c.ellipse(w/2,fy+vs*.02,vs*.5,vs*.13,0,0,TAU);c.fill();c.restore();
-   drawTT(c,sel,tierOf(sel),w/2,fy,vs,rot,{smooth:true,siren:true,t:TT});
+   drawTT(c,sel,tierOf(sel),w/2,fy,vs,rot,{smooth:true,siren:true,t:TT,hd:true});
    if(UPF>0){UPF-=dt;if(UPF>.95)for(let q=0;q<40;q++){const a=Math.random()*TAU,v=60+Math.random()*180;ps.add({x:w/2,y:fy-vs*.2,vx:Math.cos(a)*v,vy:Math.sin(a)*v-60,g:160,r:2+Math.random()*2,max:1,col:q%2?'#ffd23f':'#fff',add:1});}}
    ps.draw(c);});};
  render();}
