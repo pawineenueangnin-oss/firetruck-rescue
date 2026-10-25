@@ -2,7 +2,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Firetruck Rescue</title><meta name="theme-color" content="#1b2340">
 <link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css"><link rel="stylesheet" href="v2.css">
 </head><body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
  <linearGradient id="gh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8aa0"/><stop offset=".55" stop-color="#ff3d62"/><stop offset="1" stop-color="#c41846"/></linearGradient>
@@ -16,6 +16,8 @@
  <symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="6.5" r="4" fill="#ffd2a8" stroke="#7a4a20" stroke-width="1.2"/><path d="M4.5 22c0-5 3.4-8.5 7.5-8.5s7.5 3.5 7.5 8.5z" fill="#4aa8ff" stroke="#14508f" stroke-width="1.2"/></symbol>
  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 1.5-4.5 2.5-6 .3 2 1.2 3 2 3C10 8 11 5 12 2z" fill="#ff7a1e" stroke="#a63200" stroke-width="1.2"/><path d="M12 12c.6 2 3 3 3 5.5a3 3 0 0 1-6 0c0-1.5 1-2.6 3-5.5z" fill="#ffe066"/></symbol>
  <symbol id="i-carrot" viewBox="0 0 24 24"><path d="M14 7.5 4 20.5c-.5.6.1 1.2.7.7L17.6 11z" fill="#ff8a1e" stroke="#a64b00" stroke-width="1.2" stroke-linejoin="round"/><path d="M15 8c1-3 3-5 5.5-5-1 1.5-1.5 2.7-1.4 3.6 1.4-.6 2.7-.6 3.9.2-2.4.6-3.8 2.3-6.1 3.2z" fill="#4cc23a" stroke="#256b17" stroke-width="1"/></symbol>
+ <symbol id="i-pause" viewBox="0 0 24 24"><rect x="5.5" y="4" width="4.6" height="16" rx="1.6" fill="#fff" stroke="#7a1a10" stroke-width="1.3"/><rect x="13.9" y="4" width="4.6" height="16" rx="1.6" fill="#fff" stroke="#7a1a10" stroke-width="1.3"/></symbol>
+ <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="none" stroke="#fff" stroke-width="2.2"/><path d="M9.2 9.3a2.9 2.9 0 1 1 4.2 2.6c-.9.5-1.4 1.1-1.4 2.1v.6" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round"/><circle cx="12" cy="17.6" r="1.4" fill="#fff"/></symbol>
  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="#fff" stroke="#5b6b85" stroke-width="1.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="#5b6b85" stroke-width="2"/></symbol>
 </defs></svg>
 <canvas id="c"></canvas>
@@ -34,7 +36,8 @@
 <div id="map" class="scr"></div>
 <div id="pop"></div>
 <div id="toast"></div>
-<div id="story" class="scr"><button class="skip" id="bSkip"></button><div class="cap" id="cap"></div></div>
+<div id="story" class="scr"><button class="skip" id="bSkip"></button><div class="cap" id="cap"></div><div id="credits"></div></div>
+<div id="tutb"></div>
 <div id="splash"><img src="studio-logo.png" alt=""><div class="sn">P-Prece Studio</div><div class="snt">พีพีช Studio</div></div>
-<script src="i18n.js"></script><script src="logic.js"></script><script src="levels.js"></script><script src="game.js"></script>
+<script src="i18n.js"></script><script src="i18n2.js"></script><script src="logic.js"></script><script src="levels.js"></script><script src="sprites/sprites.js"></script><script src="game.js"></script><script src="v2.js"></script>
 </body></html>

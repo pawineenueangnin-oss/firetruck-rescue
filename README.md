@@ -10,3 +10,6 @@ A fire breaks out in Maple Town and the emergency vehicles are stuck in traffic.
 - 21 languages, offline PWA
 
 Play: https://pawineenueangnin-oss.github.io/firetruck-rescue/
+
+## v2
+Cinematic story (intro, 5 chapter cinematics, boss cutscenes, ending + credits), realistic pre-rendered 3/4-view vehicles (sprites/), painted chapter scenes (img/), interactive tutorial L1–3, tip cards, "?" how-to-play, pause menu, graphics quality (auto/high/low). Debug: `?debug=ending|intro|c1..c5|b1..b4`, `?notut`.
