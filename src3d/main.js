@@ -104,17 +104,29 @@ function init(){
  function switchObj(id){return getObj(id,()=>{const g=new THREE.Group();const base=new THREE.Mesh(new THREE.CylinderGeometry(.3,.34,.06,28),new THREE.MeshStandardMaterial({color:0x2a2d33,metalness:.5,roughness:.5}));base.position.y=.03;base.receiveShadow=true;g.add(base);
    const btn=new THREE.Mesh(new THREE.CylinderGeometry(.2,.22,.08,28),new THREE.MeshStandardMaterial({color:0xffc21a,emissive:0x664400,roughness:.3}));btn.position.y=.09;g.add(btn);g.userData.btn=btn;
    const s=new THREE.Sprite(glowMat(0xffd23f,.0));s.scale.setScalar(.9);s.position.y=.15;g.add(s);g.userData.gl=s;return g;});}
- // v5: ~45° tilted camera, rendered into the full-width play viewport (G.view) and fitted tightly to the playable cells
- const TILT=Math.PI/4;const _c=new THREE.Vector3();const VP=()=>(G&&G.view)||BOARD;
- function boardCam(){const L=B3.L,c=B3.cam;const vp=VP();const asp=vp.w/vp.h;const hx=L.w/2+.12,hz=L.h/2+.2;const D=Math.max(hx,hz*1.15)*4+4;
-  let tilt=TILT,orb=0;if(G.state==='win'){const u=cl(G.winT/1.6,0,1),e=u*u*(3-2*u);tilt=TILT+e*.1;orb=G.winT*.1*e;}
+ // v6: ~58° elevation (32° from vertical) camera into the play viewport (G.view); board anchored to the top of the viewport,
+ // spare room below is filled with street props; spare room above goes to the live fire scene (layout below).
+ const TILT=32*Math.PI/180;const _c=new THREE.Vector3();const VP=()=>(G&&G.view)||BOARD;
+ function camPose(c,L,tilt,orb){const hx=L.w/2+.12,hz=L.h/2+.2;const D=Math.max(hx,hz*1.15)*4+4;
   c.position.set(Math.sin(orb)*Math.sin(tilt)*D,Math.cos(tilt)*D,Math.cos(orb)*Math.sin(tilt)*D);c.up.set(0,1,0);c.lookAt(0,0,0);c.updateMatrixWorld();
-  // camera-space tangent bounds of every playable corner (street level + vehicle roof height)
   let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;const inv=c.matrixWorldInverse;
   for(const sx of [-1,1])for(const sz of [-1,1])for(const y of [0,.42]){_c.set(sx*hx,y,sz*hz).applyMatrix4(inv);const dz=-_c.z;const tx=_c.x/dz,ty=_c.y/dz;x0=Math.min(x0,tx);x1=Math.max(x1,tx);y0=Math.min(y0,ty);y1=Math.max(y1,ty);}
-  // grow the short axis to the viewport aspect (keeps pixels square), centred
-  let w=x1-x0,h=y1-y0;if(w/h<asp){const nw=h*asp;x0-=(nw-w)/2;x1=x0+nw;}else{const nh=w/asp;y0-=(nh-h)/2;y1=y0+nh;}
+  return{x0,x1,y0,y1,D};}
+ const _fc=new THREE.PerspectiveCamera();
+ window.R3boardRatio=function(L){const f=camPose(_fc,L,TILT,0);return (f.y1-f.y0)/(f.x1-f.x0);};// on-screen height / width of the fitted board
+ function boardCam(){const L=B3.L,c=B3.cam;const vp=VP();const asp=vp.w/vp.h;
+  let tilt=TILT,orb=0;if(G.state==='win'){const u=cl(G.winT/1.6,0,1),e=u*u*(3-2*u);tilt=TILT+e*.1;orb=G.winT*.1*e;}
+  let {x0,x1,y0,y1,D}=camPose(c,L,tilt,orb);
+  let w=x1-x0,h=y1-y0;if(w/h<asp){const nw=h*asp;x0-=(nw-w)/2;x1=x0+nw;}else{const nh=w/asp;y0=y1-nh;}// extra height → below the board (props)
   const n=D*.3,f=D*3;c.near=n;c.far=f;c.aspect=asp;c.projectionMatrix.makePerspective(x0*n,x1*n,y1*n,y0*n,n,f);c.projectionMatrixInverse.copy(c.projectionMatrix).invert();B3.camOK=true;}
+ // street life in the strip below the board: hydrants, cones, barriers and a small crowd of onlookers (all procedural)
+ const PPL=[0x2f6fd6,0xe0a020,0x3aa05a,0xc8406a,0x8a5ad0,0xe07030,0x4ab0c8];
+ function person(i){return getObj('pp'+i,()=>{const g=new THREE.Group();const body=new THREE.Mesh(new THREE.CapsuleGeometry(.09,.18,4,10),new THREE.MeshStandardMaterial({color:PPL[i%PPL.length],roughness:.7}));body.position.y=.2;body.castShadow=true;g.add(body);
+   const head=new THREE.Mesh(new THREE.SphereGeometry(.075,12,10),new THREE.MeshStandardMaterial({color:[0xf0c8a0,0xc89060,0x8a5a3a][i%3],roughness:.6}));head.position.y=.42;head.castShadow=true;g.add(head);return g;});}
+ function decor(t){const L=B3.L,vp=VP();const hz=L.h/2,hx=L.w/2;// only when the viewport has spare room under the board
+  const ez=hz+.45;let k=0;const sp=Math.max(1.2,(L.w+2)/6);
+  for(let x=-hx-.4;x<=hx+.4;x+=sp,k++){const z=ez+.2+((k*37)%3)*.08;const o=k%3===0?propObj('dh'+k,'hyd',[.5,.5]):propObj('dc'+k,'cone',[.45,.45]);o.position.set(x,0,z);}
+  for(let i=0;i<Math.max(6,L.w+3);i++){const p=person(i);const x=-hx+((i*0.61803)%1)*L.w*1.05,z=ez+.55+((i*7)%3)*.2;p.position.set(x,Math.abs(Math.sin(t*3+i*1.7))*.05,z);p.rotation.y=Math.PI+Math.sin(i)*.4;}}
  const _r=new THREE.Raycaster(),_n=new THREE.Vector2(),_pl=new THREE.Plane(new THREE.Vector3(0,1,0),-.12),_h=new THREE.Vector3();
  // screen -> cell: raycast through the 3D camera onto the street (at car-body height); generous: snap to nearest occupied cell within .75
  window.pickCell=function(px,py){if(!live()||!B3.camOK||!G||B3.key2!==G)return null;const bx=VP();_n.set((px-bx.ox)/bx.w*2-1,-((py-bx.oy)/bx.h*2-1));_r.setFromCamera(_n,B3.cam);if(!_r.ray.intersectPlane(_pl,_h))return null;
@@ -143,6 +155,7 @@ function init(){
   G.st.gates.forEach((g,i)=>{const o=gateObj('g'+i);const [x,z]=W2(g.x,g.y);o.position.set(x,0,z);o.userData.arm.rotation.z=G.gateA*1.35;if(G.gateA>0&&G.gateA<1)moving=true;});
   // hint ring
   const hv=G.hint&&G.st.veh[G.hint.id];B3.ring.visible=!!(hv&&!hv.gone);if(B3.ring.visible){const [x,z]=W2(hv.x,hv.y);const p=.5+.5*Math.sin(G.hint.t*6);B3.ring.position.set(x,.015,z);B3.ring.scale.setScalar(1+p*.12);B3.ring.material.opacity=.5+p*.5;}
+  decor(t);
   // sweep unused objects
   for(const [id,o] of B3.objs)if(o.userData.seen!==B3.frame){B3.root.remove(o);if(o.userData.arrow)B3.root.remove(o.userData.arrow);B3.objs.delete(id);moving=true;}
   if(G.state==='win')moving=true;
