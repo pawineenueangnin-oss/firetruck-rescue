@@ -2,3 +2,4 @@ node_modules/
 _*.js
 draft*.json
 gen*.log
+node_modules
