@@ -224,8 +224,8 @@ function stepParts(dt){for(let i=parts.length-1;i>=0;i--){const p=parts[i];if(p.
 // ---------- Layout ----------
 let G=null,MODE='splash',DT=0,TT=0,CAM={sh:0};
 function sceneRect(){const top=58;const h=Math.round(clamp(H*.2,104,176));return{x:0,y:top,w:W,h};}
-function layout(){if(!G)return;const L=G.L;const S=sceneRect();G.S=S;document.documentElement.style.setProperty('--sh',S.h+'px');const top=S.y+S.h+30,bot=82+BANNER();const availW=W-28,availH=H-top-bot;
- G.cs=Math.floor(Math.min(availW/L.w,availH/L.h,84));G.bw=G.cs*L.w;G.bh=G.cs*L.h;G.bx=Math.round((W-G.bw)/2);G.by=Math.round(top+(availH-G.bh)/2);buildBoard();}
+function layout(){if(!G)return;const L=G.L;const S=sceneRect();G.S=S;document.documentElement.style.setProperty('--sh',S.h+'px');const top=S.y+S.h+26,bot=78+BANNER();const availW=W-14,availH=H-top-bot;
+ G.cs=Math.floor(Math.min(availW/L.w,availH/L.h,96));G.bw=G.cs*L.w;G.bh=G.cs*L.h;G.bx=Math.round((W-G.bw)/2);G.by=Math.round(top+(availH-G.bh)/2);G.view={ox:0,oy:top-4,w:W,h:Math.max(80,availH+8)};buildBoard();}
 let BOARD=null;
 function buildBoard(){const cs=G.cs,pad=cs*1.3;const w=G.bw+pad*2,h=G.bh+pad*2;const c=document.createElement('canvas');c.width=Math.ceil(w*DPR);c.height=Math.ceil(h*DPR);const g=c.getContext('2d');g.scale(DPR,DPR);const ox=pad,oy=pad;
  g.save();g.shadowColor='rgba(0,0,0,.55)';g.shadowBlur=18;g.shadowOffsetY=8;g.fillStyle='#8a8f9c';rr(g,ox-cs*.22,oy-cs*.22,G.bw+cs*.44,G.bh+cs*.44,cs*.22);g.fill();g.restore();

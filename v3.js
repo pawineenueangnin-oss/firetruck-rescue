@@ -118,7 +118,7 @@ window.renderBoard=function(){
  const fr=G.state==='win'?0:clamp(G.fire/G.fireMax,0,1.3);_renderBoard();
  if(fr>0&&!LOW()){const fl=.85+.15*Math.sin(G.t*9)+.07*Math.sin(G.t*23);cx.save();cx.globalCompositeOperation='lighter';const y0=G.by-G.cs*1.2;const gr=cx.createLinearGradient(0,y0,0,y0+G.bh*.6);gr.addColorStop(0,`rgba(255,110,30,${.2*fr*fl})`);gr.addColorStop(1,'rgba(255,90,20,0)');cx.fillStyle=gr;cx.fillRect(G.bx-G.cs*1.3,y0,G.bw+G.cs*2.6,G.bh*.6);cx.restore();}};
 // ---------- Fire scene: taller, parallax, backlit firefighters spraying water ----------
-window.sceneRect=function(){const top=58;const h=Math.round(clamp(H*.255,128,230));return{x:0,y:top,w:W,h};};
+window.sceneRect=function(){const top=56;const h=Math.round(clamp(H*.13,78,130));return{x:0,y:top,w:W,h};};
 function ffSil(c,x,y,h,dir,t,ph,spray,tx,ty){const u=h/7.5;c.save();c.translate(x,y);c.scale(dir,1);
  c.fillStyle='#0d0b0c';// legs, coat, tank, helmet
  c.beginPath();c.moveTo(-u*.7,0);c.lineTo(-u*.5,-u*3.4);c.lineTo(u*.5,-u*3.4);c.lineTo(u*.75,0);c.lineTo(u*.25,0);c.lineTo(0,-u*2.2);c.lineTo(-u*.25,0);c.closePath();c.fill();
@@ -316,7 +316,7 @@ window.drawStory=function(){cx.fillStyle='#000';cx.fillRect(0,0,W,H);if(!SQ.seq)
   if(SQ.t>1.4){cx.globalAlpha=.5+.5*Math.sin(TT*4);cx.font=`700 ${Math.round(Math.min(W*.034,14))}px GameFont,system-ui,sans-serif`;cx.fillStyle='#fff';cx.fillText(T('tapGo'),W/2,H-lb-H*.025);}}
  cx.restore();};
 // tap during story = next shot
-document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('button'))return;if(MODE!=='story'||!SQ.seq)return;const s=SQ.seq[SQ.i];if(s&&!s.credits&&SQ.t>.6){SQ.t=s.d;}});
+document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('button'))return;if(MODE!=='story'||!SQ.seq)return;const s=SQ.seq[SQ.i];if(s&&!s.credits&&SQ.t>.6){SQ.t=s.d;SQ.tap=1;}});
 // ---------- Story log / gallery ----------
 function logEntries(){const L=[];const cl=i=>SAVE.stars[i]>0;L.push({k:'intro',im:'i1',lab:T('story'),ok:!!SAVE.seen.story||cl(0)});
  for(let ch=1;ch<=5;ch++){L.push({k:'c'+ch,im:'c'+ch,lab:`${T('chapter')} ${ch}`,ok:cl((ch-1)*6)||!!SAVE.seen['ch'+ch],head:T('c'+ch)});
@@ -374,3 +374,27 @@ const dbg=new URLSearchParams(location.search).get('debug');
 if(dbg)setTimeout(()=>{if(/^s\d+$/.test(dbg))playSeq(dbg,()=>showMap());else if(dbg==='garage')showGarage();else if(dbg==='log'){showMap();showLog();}
  else if(dbg==='result'||dbg==='lose'){window.__ft.noTut=true;startLevel(4,true);setTimeout(()=>{G.rew=calcRew(G,true);G.rew.xp0=S3.xp;G.rew.c0=S3.coins;S3.xp+=G.rew.xp;S3.coins+=G.rew.coins;dbg==='lose'?showGameOver(G):showResult(G);},300);}},2000);
 })();
+// ---------- Read story captions aloud (Web Speech API) in the game's language; speaker toggle saved in localStorage ----------
+(function(){const SS=window.speechSynthesis;const LOC={en:'en-US',th:'th-TH',zh:'zh-CN',ja:'ja-JP',ko:'ko-KR',vi:'vi-VN',id:'id-ID',ms:'ms-MY',hi:'hi-IN',es:'es-ES',pt:'pt-BR',fr:'fr-FR',de:'de-DE',it:'it-IT',ru:'ru-RU',tr:'tr-TR',ar:'ar-SA',nl:'nl-NL',pl:'pl-PL',lo:'lo-LA',fil:'fil-PH'};
+ let on=true;try{on=localStorage.getItem('ft_tts')!=='0';}catch(e){}
+ const base=l=>String(l||'').toLowerCase().replace('_','-').split('-')[0];
+ function tag(){const t=LOC[LANG]||'en-US';// prefer the device's own region when it shares the base language (e.g. es-MX, pt-PT, en-GB)
+  const dev=[...(navigator.languages||[]),navigator.language].filter(Boolean).find(d=>base(d)===base(t)||(LANG==='fil'&&/^(tl|fil)/i.test(d)));return dev&&dev.includes('-')?dev:t;}
+ function voice(t){if(!SS||!SS.getVoices)return null;const vs=SS.getVoices()||[];if(!vs.length)return undefined;const T=t.toLowerCase().replace('_','-'),b=base(t),alt=b==='fil'?['fil','tl']:[b];
+  const m=vs.filter(v=>alt.includes(base(v.lang)));if(!m.length)return null;const sc=v=>(v.lang.toLowerCase().replace('_','-')===T?4:0)+(v.lang.toLowerCase().replace('_','-')===(LOC[LANG]||'').toLowerCase()?2:0)+(v.localService?1:0)+(v.default?.5:0);
+  return m.sort((a,b2)=>sc(b2)-sc(a))[0];}
+ if(SS&&SS.addEventListener)try{SS.addEventListener('voiceschanged',()=>{});SS.getVoices();}catch(e){}
+ let cur=null;
+ const TTS=window.TTS={get on(){return on;},supported:!!(SS&&window.SpeechSynthesisUtterance),last:null,
+  say(text){if(!on||!TTS.supported||!text)return false;try{SS.cancel();const t=tag();const v=voice(t);if(v===null){TTS.last={text,lang:t,voice:null,skipped:true};return false;}// no voice for this language installed: stay silent rather than mispronounce
+    const u=new SpeechSynthesisUtterance(text);u.lang=v&&v.lang?v.lang.replace('_','-'):t;if(v)u.voice=v;u.rate=.95;u.pitch=1.05;u.volume=1;u.onend=u.onerror=()=>{if(cur===u)cur=null;};cur=u;
+    TTS.last={text,lang:u.lang,voice:v?v.name:''};SS.speak(u);return true;}catch(e){return false;}},
+  stop(){cur=null;try{SS&&SS.cancel();}catch(e){}},busy(){try{return !!(on&&cur&&SS&&(SS.speaking||SS.pending));}catch(e){return false;}},
+  set(v){on=!!v;try{localStorage.setItem('ft_tts',on?'1':'0');}catch(e){}if(!on)TTS.stop();upd();}};
+ const st=$('story');let b=$('bSpk');if(!b&&st){b=document.createElement('button');b.id='bSpk';b.className='spk';st.appendChild(b);}
+ const ic=o=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#fff"/>${o?'<path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>':'<path d="M16 9l5 6M21 9l-5 6" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>'}</svg>`;
+ function upd(){if(!b)return;b.innerHTML=ic(on);b.setAttribute('aria-label',on?'mute voice':'unmute voice');b.style.display=TTS.supported?'':'none';}
+ if(b){upd();b.addEventListener('click',e=>{e.stopPropagation();TTS.set(!on);if(on){const c=$('cap');if(c&&c.classList.contains('on'))TTS.say(c.textContent);}});}
+ const sm=window.setMode;window.setMode=function(m){if(m!=='story')TTS.stop();return sm.apply(this,arguments);};
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)TTS.stop();});window.addEventListener('pagehide',()=>TTS.stop());
+ window.__ft.TTS=TTS;})();

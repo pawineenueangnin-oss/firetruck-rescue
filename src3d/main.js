@@ -65,6 +65,7 @@ function init(){
   const k=B3.key=new THREE.DirectionalLight(0xfff0dc,2.4);k.position.set(-6,8,-2.5);k.castShadow=true;k.shadow.mapSize.set(1024,1024);k.shadow.bias=-.0006;k.shadow.normalBias=.02;k.shadow.radius=4;s.add(k);s.add(k.target);
   B3.fireL=new THREE.DirectionalLight(0xff7a2a,0);B3.fireL.position.set(0,4,-8);s.add(B3.fireL);
   const gm=new THREE.MeshStandardMaterial({color:0xb8b8bc,roughness:.38,metalness:.2,transparent:true,envMapIntensity:.7});
+  B3.apron=new THREE.Mesh(new THREE.PlaneGeometry(80,80),new THREE.MeshStandardMaterial({color:0x2a2d34,roughness:.9}));B3.apron.rotation.x=-Math.PI/2;B3.apron.position.y=-.02;B3.apron.receiveShadow=true;s.add(B3.apron);
   B3.ground=new THREE.Mesh(new THREE.PlaneGeometry(1,1),gm);B3.ground.rotation.x=-Math.PI/2;B3.ground.receiveShadow=true;s.add(B3.ground);
   B3.ring=new THREE.Mesh(new THREE.RingGeometry(.42,.52,40),new THREE.MeshBasicMaterial({color:0xffe24a,transparent:true,toneMapped:false,depthWrite:false}));B3.ring.rotation.x=-Math.PI/2;B3.ring.position.y=.015;s.add(B3.ring);
   const ag=new THREE.Shape();ag.moveTo(.08,0);ag.lineTo(-.05,-.075);ag.lineTo(-.05,.075);ag.closePath();B3.arrowGeo=new THREE.ShapeGeometry(ag);B3.arrowGeo.rotateX(-Math.PI/2);
@@ -103,20 +104,24 @@ function init(){
  function switchObj(id){return getObj(id,()=>{const g=new THREE.Group();const base=new THREE.Mesh(new THREE.CylinderGeometry(.3,.34,.06,28),new THREE.MeshStandardMaterial({color:0x2a2d33,metalness:.5,roughness:.5}));base.position.y=.03;base.receiveShadow=true;g.add(base);
    const btn=new THREE.Mesh(new THREE.CylinderGeometry(.2,.22,.08,28),new THREE.MeshStandardMaterial({color:0xffc21a,emissive:0x664400,roughness:.3}));btn.position.y=.09;g.add(btn);g.userData.btn=btn;
    const s=new THREE.Sprite(glowMat(0xffd23f,.0));s.scale.setScalar(.9);s.position.y=.15;g.add(s);g.userData.gl=s;return g;});}
- const TILT=.2;const _c=new THREE.Vector3();
- function boardCam(){const r=B3.reg,c=B3.cam;const bx=BOARD;c.aspect=bx.w/bx.h;const hz=r.h/2,hx=r.w/2;const D=Math.max(hx,hz)*1.55+2.5;
-  let tilt=TILT,orb=0;if(G.state==='win'){const u=cl(G.winT/1.6,0,1),e=u*u*(3-2*u);tilt=TILT+e*.38;orb=G.winT*.1*e;}
-  c.position.set(r.cx+Math.sin(orb)*Math.sin(tilt)*D,Math.cos(tilt)*D,r.cz+Math.cos(orb)*Math.sin(tilt)*D);c.up.set(0,1,0);c.lookAt(r.cx,0,r.cz-hz*.06);c.updateMatrixWorld();
-  // fit the whole street (+ vehicle height) inside the viewport
-  let m=0;const inv=c.matrixWorldInverse;for(const sx of [-1,1])for(const sz of [-1,1])for(const y of [0,.35]){_c.set(r.cx+sx*hx*.97,y,r.cz+sz*hz*.97).applyMatrix4(inv);const dz=-_c.z;m=Math.max(m,Math.abs(_c.y)/dz,Math.abs(_c.x)/dz/c.aspect);}
-  c.fov=2*Math.atan(m)*180/Math.PI;c.near=D*.3;c.far=D*3;c.updateProjectionMatrix();B3.camOK=true;}
+ // v5: ~45° tilted camera, rendered into the full-width play viewport (G.view) and fitted tightly to the playable cells
+ const TILT=Math.PI/4;const _c=new THREE.Vector3();const VP=()=>(G&&G.view)||BOARD;
+ function boardCam(){const L=B3.L,c=B3.cam;const vp=VP();const asp=vp.w/vp.h;const hx=L.w/2+.12,hz=L.h/2+.2;const D=Math.max(hx,hz*1.15)*4+4;
+  let tilt=TILT,orb=0;if(G.state==='win'){const u=cl(G.winT/1.6,0,1),e=u*u*(3-2*u);tilt=TILT+e*.1;orb=G.winT*.1*e;}
+  c.position.set(Math.sin(orb)*Math.sin(tilt)*D,Math.cos(tilt)*D,Math.cos(orb)*Math.sin(tilt)*D);c.up.set(0,1,0);c.lookAt(0,0,0);c.updateMatrixWorld();
+  // camera-space tangent bounds of every playable corner (street level + vehicle roof height)
+  let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;const inv=c.matrixWorldInverse;
+  for(const sx of [-1,1])for(const sz of [-1,1])for(const y of [0,.42]){_c.set(sx*hx,y,sz*hz).applyMatrix4(inv);const dz=-_c.z;const tx=_c.x/dz,ty=_c.y/dz;x0=Math.min(x0,tx);x1=Math.max(x1,tx);y0=Math.min(y0,ty);y1=Math.max(y1,ty);}
+  // grow the short axis to the viewport aspect (keeps pixels square), centred
+  let w=x1-x0,h=y1-y0;if(w/h<asp){const nw=h*asp;x0-=(nw-w)/2;x1=x0+nw;}else{const nh=w/asp;y0-=(nh-h)/2;y1=y0+nh;}
+  const n=D*.3,f=D*3;c.near=n;c.far=f;c.aspect=asp;c.projectionMatrix.makePerspective(x0*n,x1*n,y1*n,y0*n,n,f);c.projectionMatrixInverse.copy(c.projectionMatrix).invert();B3.camOK=true;}
  const _r=new THREE.Raycaster(),_n=new THREE.Vector2(),_pl=new THREE.Plane(new THREE.Vector3(0,1,0),-.12),_h=new THREE.Vector3();
  // screen -> cell: raycast through the 3D camera onto the street (at car-body height); generous: snap to nearest occupied cell within .75
- window.pickCell=function(px,py){if(!live()||!B3.camOK||!G||B3.key2!==G)return null;const bx=BOARD;_n.set((px-bx.ox)/bx.w*2-1,-((py-bx.oy)/bx.h*2-1));_r.setFromCamera(_n,B3.cam);if(!_r.ray.intersectPlane(_pl,_h))return null;
+ window.pickCell=function(px,py){if(!live()||!B3.camOK||!G||B3.key2!==G)return null;const bx=VP();_n.set((px-bx.ox)/bx.w*2-1,-((py-bx.oy)/bx.h*2-1));_r.setFromCamera(_n,B3.cam);if(!_r.ray.intersectPlane(_pl,_h))return null;
   const gx=_h.x+B3.L.w/2-.5,gy=_h.z+B3.L.h/2-.5;let x=Math.round(gx),y=Math.round(gy);if(G.st.occ[x+','+y])return[x,y];let best=null,bd=.75;
   for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){const k=(x+dx)+','+(y+dy);if(!G.st.occ[k])continue;const d=Math.hypot(gx-x-dx,gy-y-dy);if(d<bd){bd=d;best=[x+dx,y+dy];}}return best||[x,y];};
  // cell -> screen (used by 2D particles, hints, impacts) through the same 3D camera
- const _cxy=window.cellXY;window.cellXY=function(x,y){if(!live()||!B3.camOK||!G||B3.key2!==G)return _cxy(x,y);_c.set(x+.5-B3.L.w/2,.15,y+.5-B3.L.h/2).project(B3.cam);const bx=BOARD;return[bx.ox+(_c.x+1)/2*bx.w,bx.oy+(1-_c.y)/2*bx.h];};
+ const _cxy=window.cellXY;window.cellXY=function(x,y){if(!live()||!B3.camOK||!G||B3.key2!==G)return _cxy(x,y);_c.set(x+.5-B3.L.w/2,.15,y+.5-B3.L.h/2).project(B3.cam);const bx=VP();return[bx.ox+(_c.x+1)/2*bx.w,bx.oy+(1-_c.y)/2*bx.h];};
  function drawBoard3D(){const t0=performance.now();if(B3.key2!==G||B3.board!==BOARD)setupBoard();B3.frame=(B3.frame||0)+1;const t=G.t,cs=G.cs;const H=hi();
   B3.key.castShadow=H;let moving=B3.shadowDirty>0;if(B3.shadowDirty>0)B3.shadowDirty--;
   const fr=G.state==='win'?0:cl(G.fire/G.fireMax,0,1.3);B3.fireL.intensity=fr*(1.1+.25*Math.sin(t*9)+.1*Math.sin(t*23));
@@ -142,7 +147,7 @@ function init(){
   for(const [id,o] of B3.objs)if(o.userData.seen!==B3.frame){B3.root.remove(o);if(o.userData.arrow)B3.root.remove(o.userData.arrow);B3.objs.delete(id);moving=true;}
   if(G.state==='win')moving=true;
   R.shadowMap.autoUpdate=false;R.shadowMap.needsUpdate=H&&moving;
-  boardCam();const bx=BOARD;const pr=prRatio();const pw=Math.round(bx.w*pr),ph=Math.round(bx.h*pr);prep(pw,ph);R.render(B3.scene,B3.cam);blit(cx,pw,ph,bx.ox,bx.oy,bx.w,bx.h);
+  boardCam();const bx=VP();const pr=prRatio();const pw=Math.round(bx.w*pr),ph=Math.round(bx.h*pr);prep(pw,ph);R.render(B3.scene,B3.cam);blit(cx,pw,ph,bx.ox,bx.oy,bx.w,bx.h);
   R3.ms=lp(R3.ms,performance.now()-t0,.1);}
 
  // ====================== FIRE SCENE ======================
