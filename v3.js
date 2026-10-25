@@ -16,11 +16,14 @@ function migrate(){const v={ver:3,xp:0,coins:0,fleet:{E:0,K:0,T:0,A:0},skin:0,si
  (SAVE.stars||[]).forEach((s,i)=>{if(s>0){v.xp+=60+s*35+(LEVELS[i]&&LEVELS[i].boss?60:0);v.coins+=25+s*10;v.beats[i]=1;}});
  return v;}
 if(!SAVE.v3||SAVE.v3.ver!==3){SAVE.v3=migrate();persist();LOG('v3 save migrated',JSON.stringify(SAVE.v3).slice(0,120));}
-const S3=SAVE.v3;['fleet','beats','boss','dbl','seenNew'].forEach(k=>{S3[k]=S3[k]||(k==='fleet'?{E:0,K:0,T:0,A:0}:{});});
+const S3=SAVE.v3;if(!S3.pfix){S3.pfix=1;S3.skin=0;persist();}['fleet','beats','boss','dbl','seenNew'].forEach(k=>{S3[k]=S3[k]||(k==='fleet'?{E:0,K:0,T:0,A:0}:{});});
 const PERK={E:[1,.75,.55,.4],T:[1,1.5,2,2.5],K:[0,.1,.2,.35]};
 const tierOf=t=>S3.fleet[t]||0;
 // ---------- Top-down sprites: pre-scaled, mip-stepped cache (no blur), real-time rotation ----------
 const SKF=['none','hue-rotate(205deg) saturate(.7) brightness(.78)','hue-rotate(100deg) saturate(.6) brightness(.82)','hue-rotate(36deg) saturate(1.3) brightness(1.18)'];
+// paint recolour: only body-paint pixels (red hue, saturated, not bright light/glass) take the new colour; keeps shading
+const PCOL=[null,[29,52,120],[24,110,52],[214,160,24]];
+function repaint(c,sk){try{const g=c.getContext('2d'),d=g.getImageData(0,0,c.width,c.height),a=d.data,P=PCOL[sk];for(let i=0;i<a.length;i+=4){if(a[i+3]<20)continue;const r=a[i],G=a[i+1],b=a[i+2],mx=Math.max(r,G,b),mn=Math.min(r,G,b);if(mx!==r||mx<40||mx>245&&mn>120)continue;const sat=(mx-mn)/mx;if(sat<.45)continue;const hd=(G-b)/(mx-mn);if(hd<-.35||hd>.5)continue;const l=(r*.6+G*.3+b*.1)/150;a[i]=Math.min(255,P[0]*l);a[i+1]=Math.min(255,P[1]*l);a[i+2]=Math.min(255,P[2]*l);}g.putImageData(d,0,0);}catch(e){}}
 const CACHE=new Map();const CELLU=.9;
 function sname(type){return 'EKTA'.includes(type)?type+tierOf(type):type;}
 function skinFor(name){return /^[EKT]/.test(name)&&name.length===2?S3.skin:0;}
@@ -28,7 +31,7 @@ function spr(name,px){const sk=skinFor(name);const key=name+'|'+px+'|'+sk;let e=
  if(CACHE.size>260)CACHE.clear();const FS=TD.FS,i=TD.idx[name];if(i==null)return null;const sx=(i%TD.C)*FS,sy=Math.floor(i/TD.C)*FS;
  let src=document.createElement('canvas');src.width=src.height=FS;let g=src.getContext('2d');g.drawImage(im,sx,sy,FS,FS,0,0,FS,FS);let size=FS;
  while(size/2>=px*1.05){const n=document.createElement('canvas');const ns=Math.round(size/2);n.width=n.height=ns;const ng=n.getContext('2d');ng.imageSmoothingQuality='high';ng.drawImage(src,0,0,ns,ns);src=n;size=ns;}
- const c=document.createElement('canvas');c.width=c.height=px;g=c.getContext('2d');g.imageSmoothingQuality='high';if(sk)g.filter=SKF[sk];g.drawImage(src,0,0,px,px);g.filter='none';
+ const c=document.createElement('canvas');c.width=c.height=px;g=c.getContext('2d');g.imageSmoothingQuality='high';g.drawImage(src,0,0,px,px);if(sk)repaint(c,sk);
  const sh=document.createElement('canvas');sh.width=sh.height=px;const sg=sh.getContext('2d');sg.filter=`brightness(0) blur(${Math.max(1,px*.022)}px)`;sg.globalAlpha=.62;sg.drawImage(c,0,0);
  e={c,sh};CACHE.set(key,e);return e;}
 // light-bar positions in model units [x, halfWidth], front x
