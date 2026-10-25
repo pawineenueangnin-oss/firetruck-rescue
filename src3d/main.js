@@ -345,6 +345,7 @@ function init(){
  window.renderBoard=function(){if(!live())return _rb();try{drawBoard3D();
    if(G.i===0&&!G.firstTap&&G.state==='play')drawHand();drawImpacts();R3.frames++;}catch(e){LOG3('board3d error → 2D',e&&e.stack);R3.off=true;_rb();}};
  window.renderScene=function(){if(!live())return _rs();try{drawScene3D();}catch(e){LOG3('scene3d error → 2D',e&&e.stack);R3.off=true;_rs();}};
+ R3.tt=drawTT3;
  window.drawTT=function(c,type,tier,x,y,s,ang,o){if(live()&&'EKTA'.includes(type)){try{if(drawTT3(c,type,tier,x,y,s,ang,o))return true;}catch(e){LOG3('tt3d error',e&&e.message);}}return _tt(c,type,tier,x,y,s,ang,o);};
  // adaptive resolution: drop pixel ratio if frames are slow
  const _u=window.update;window.update=function(dt){_u(dt);fpsT+=dt;fpsN++;if(fpsT>2){const f=fpsN/fpsT;R3.fps=f;fpsT=0;fpsN=0;if(live()&&MODE==='game'){if(f<45){slow++;if(slow>=2&&(R3.prCap||2)>1){R3.prCap=Math.max(1,(R3.prCap||2)-.5);slow=0;LOG3('adaptive pr',R3.prCap);}}else slow=0;}}};

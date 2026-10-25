@@ -67,7 +67,7 @@ window.drawBarrier=function(c,x,y,s,j){drawTD(c,'bar',x+(j?Math.sin(j*40)*3*j:0)
 window.drawHydrant=function(c,x,y,s,t){const p=.5+.5*Math.sin((t||0)*4);c.save();c.globalCompositeOperation='lighter';const g=c.createRadialGradient(x,y,0,x,y,s*.5);g.addColorStop(0,`rgba(90,190,255,${.22+p*.14})`);g.addColorStop(1,'rgba(90,190,255,0)');c.fillStyle=g;c.fillRect(x-s*.5,y-s*.5,s,s);c.restore();drawTD(c,'hyd',x,y,s*1.55,0,{});};
 // 3/4 turntable sprite (garage, scene strip, result lineup)
 const _veh3q=window.__v2drawVeh||null;
-function drawTT(c,type,tier,x,y,s,ang,o){o=o||{};let im=ttImg();const key=type+tier;let row=TQ.rows[key];if(row==null)return false;const N=TQ.N;let FS=TQ.FS,R=1;
+function _drawTT2(c,type,tier,x,y,s,ang,o){o=o||{};let im=ttImg();const key=type+tier;let row=TQ.rows[key];if(row==null)return false;const N=TQ.N;let FS=TQ.FS,R=1;
  const devPx=s*(o.dpr||DPR)*1.6;if(o.hd||devPx>FS){const h=IMG('sprites/hd/'+key+'.webp');if(ok(h)){im=h;row=0;R=448/TQ.FS;FS=448;}}if(!ok(im))return false;
  let a=((ang%TAU)+TAU)%TAU;const f=a/(TAU/N);const f0=Math.floor(f)%N,f1=(f0+1)%N,u=f-Math.floor(f);const k=s/(CELLU*TQ.scale*R),ax=TQ.anchor[0]*R*k,ay=TQ.anchor[1]*R*k;
  c.save();if(o.filter&&o.filter!=='none')c.filter=o.filter;if(o.alpha!=null)c.globalAlpha=o.alpha;
@@ -76,7 +76,7 @@ function drawTT(c,type,tier,x,y,s,ang,o){o=o||{};let im=ttImg();const key=type+t
  if(o.siren){const fi=(o.smooth&&u<=.86?f0:Math.round(f))%N;const lb=(TQ.lb[key]||[])[fi]||[];const t=o.t||TT;const ph=Math.floor(t*8+(o.ph||0))%2;c.save();c.globalCompositeOperation='lighter';
   lb.forEach((p,i)=>{const px=x+(p[0]-TQ.anchor[0])*R*k,py=y+(p[1]-TQ.anchor[1])*R*k;const col=i===0?'255,40,30':'40,110,255';const on=i===ph;const r=s*(on?.38:.1);const g=c.createRadialGradient(px,py,0,px,py,r);g.addColorStop(0,`rgba(255,255,255,${on?.95:.5})`);g.addColorStop(.15,`rgba(${col},${on?.8:.4})`);g.addColorStop(1,`rgba(${col},0)`);c.fillStyle=g;c.fillRect(px-r,py-r,r*2,r*2);});c.restore();}
  return true;}
-window.drawTT=drawTT;
+window.drawTT=_drawTT2;function drawTT(...a){return window.drawTT(...a);}
 // ---------- Street board (top-down city asphalt) ----------
 window.buildBoard=function(){const cs=G.cs,pad=cs*1.3;const w=G.bw+pad*2,h=G.bh+pad*2;const c=document.createElement('canvas');c.width=Math.ceil(w*DPR);c.height=Math.ceil(h*DPR);const g=c.getContext('2d');g.scale(DPR,DPR);const ox=pad,oy=pad,bw=G.bw,bh=G.bh,R=seeded(11+G.i);
  // sidewalk slabs
