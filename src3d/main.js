@@ -69,7 +69,7 @@ function init(){
   B3.ground=new THREE.Mesh(new THREE.PlaneGeometry(1,1),gm);B3.ground.rotation.x=-Math.PI/2;B3.ground.receiveShadow=true;s.add(B3.ground);
   B3.ring=new THREE.Mesh(new THREE.RingGeometry(.42,.52,40),new THREE.MeshBasicMaterial({color:0xffe24a,transparent:true,toneMapped:false,depthWrite:false}));B3.ring.rotation.x=-Math.PI/2;B3.ring.position.y=.015;s.add(B3.ring);
   const ag=new THREE.Shape();ag.moveTo(.08,0);ag.lineTo(-.05,-.075);ag.lineTo(-.05,.075);ag.closePath();B3.arrowGeo=new THREE.ShapeGeometry(ag);B3.arrowGeo.rotateX(-Math.PI/2);
-  B3.arrowMat=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.75,toneMapped:false,depthWrite:false});
+  B3.arrowMat=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.75,toneMapped:false,depthWrite:false});B3.hintMat=new THREE.MeshBasicMaterial({color:0xffd23f,transparent:true,opacity:1,toneMapped:false,depthWrite:false,depthTest:false});
   B3.headTex=(()=>{const c=document.createElement('canvas');c.width=128;c.height=64;const g=c.getContext('2d');const gr=g.createLinearGradient(0,0,128,0);gr.addColorStop(0,'rgba(255,240,200,.55)');gr.addColorStop(1,'rgba(255,240,200,0)');g.fillStyle=gr;g.beginPath();g.moveTo(0,26);g.lineTo(128,0);g.lineTo(128,64);g.lineTo(0,38);g.fill();const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;})();
   B3.headMat=new THREE.MeshBasicMaterial({map:B3.headTex,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false});
   B3.poolMat=new THREE.MeshBasicMaterial({map:SOFT,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false});
@@ -143,8 +143,9 @@ function init(){
    const sc=E.back?E.back(cl(vv.scale,0,1)):vv.scale;o.position.set(x,mv?Math.abs(Math.sin(t*22+vv.v.id))*.012:0,z);o.rotation.y=-vv.ang;o.scale.set(sc*(1+vv.sq*.5),sc*(1-vv.sq),sc*(1+vv.sq*.3));
    u.yaw.rotation.x=u.roll+(vv.wob?Math.sin(t*40)*vv.wob*.3:0);u.yaw.rotation.z=mv?-.025:0;
    siren(o,!!vv.siren,t,vv.v.id);u.hl.visible=!!vv.siren&&H;
-   const idle=!mv&&vv.scale>=1&&!(G.hint&&G.hint.id===vv.v.id)&&G.state==='play';u.arrow.visible=idle;
-   if(idle){const [dx,dy]=FL.DIRS[vv.v.d];u.arrow.position.set(x+dx*.5,.02,z+dy*.5);u.arrow.rotation.y=-ANG[vv.v.d];u.arrow.material.opacity=.55+.2*Math.sin(t*4);}
+   const hn=!!(G.hint&&G.hint.id===vv.v.id&&!mv);const idle=!mv&&vv.scale>=1&&G.state==='play';u.arrow.visible=idle;u.arrow.material=hn?B3.hintMat:B3.arrowMat;u.arrow.renderOrder=hn?10:0;
+   if(hn){const hp=.5+.5*Math.sin(G.hint.t*6);o.position.y=Math.abs(Math.sin(G.hint.t*5))*.07;moving=true;const [dx,dy]=FL.DIRS[vv.v.d];const k=.62+hp*.14;u.arrow.position.set(x+dx*k,.03,z+dy*k);u.arrow.rotation.y=-ANG[vv.v.d];u.arrow.scale.setScalar(2.1+hp*.35);}
+   else if(idle){u.arrow.scale.setScalar(1);const [dx,dy]=FL.DIRS[vv.v.d];u.arrow.position.set(x+dx*.5,.02,z+dy*.5);u.arrow.rotation.y=-ANG[vv.v.d];u.arrow.material.opacity=.55+.2*Math.sin(t*4);}
    u.arrow.userData.seen=B3.frame;}
   // civilian cars (tow-able), cones, barriers
   G.st.blk.forEach(b=>{const k=b.x+','+b.y;const j=G.blkJ[k]||0;if(b.sub==='#'){const car=G.cars[k];if(!car||car.done)return;const hex=parseInt((car.col&&car.col[1]||'#4a8fd6').slice(1),16);
@@ -343,7 +344,7 @@ function init(){
  const live=()=>R3.ok&&!R3.lost&&!R3.off;
  let fpsT=0,fpsN=0,slow=0;
  window.renderBoard=function(){if(!live())return _rb();try{drawBoard3D();
-   if(G.i===0&&!G.firstTap&&G.state==='play')drawHand();drawImpacts();R3.frames++;}catch(e){LOG3('board3d error → 2D',e&&e.stack);R3.off=true;_rb();}};
+   if(G.hint&&window.drawHint)window.drawHint();if(G.i===0&&!G.firstTap&&G.state==='play')drawHand();drawImpacts();R3.frames++;}catch(e){LOG3('board3d error → 2D',e&&e.stack);R3.off=true;_rb();}};
  window.renderScene=function(){if(!live())return _rs();try{drawScene3D();}catch(e){LOG3('scene3d error → 2D',e&&e.stack);R3.off=true;_rs();}};
  R3.tt=drawTT3;
  window.drawTT=function(c,type,tier,x,y,s,ang,o){if(live()&&'EKTA'.includes(type)){try{if(drawTT3(c,type,tier,x,y,s,ang,o))return true;}catch(e){LOG3('tt3d error',e&&e.message);}}return _tt(c,type,tier,x,y,s,ang,o);};

@@ -148,7 +148,15 @@ window.renderBoard=function(){const cs=G.cs,t=G.t;cx.drawImage(BOARD.c,BOARD.ox,
   cx.beginPath();cx.moveTo(cs*.1,0);cx.lineTo(-cs*.05,-cs*.09);cx.lineTo(-cs*.02,0);cx.lineTo(-cs*.05,cs*.09);cx.closePath();cx.fill();cx.restore();});
  cx.save();cx.beginPath();cx.rect(G.bx-cs*1.3,G.by-cs*1.6,G.bw+cs*2.6,G.bh+cs*2.9);cx.clip();items.sort((a,b)=>a.y-b.y).forEach(i=>i.f());cx.restore();
  if(G.hint)drawHint();drawImpacts();drawTut();};
-window.drawHint=function(){const v=G.st.veh[G.hint.id];if(!v||v.gone){G.hint=null;return;}const [x,y]=cellXY(v.x,v.y);const p=.5+.5*Math.sin(G.hint.t*6);cx.save();cx.strokeStyle=`rgba(255,225,70,${.5+p*.5})`;cx.lineWidth=4;cx.shadowColor='#ffd23f';cx.shadowBlur=12;rr(cx,x-G.cs*.55,y-G.cs*.6,G.cs*1.1,G.cs*1.1,G.cs*.2);cx.stroke();cx.restore();};
+window.drawHint=function(){const v=G.st.veh[G.hint.id];if(!v||v.gone){G.hint=null;return;}const [x,y]=cellXY(v.x,v.y);const t=G.hint.t,p=.5+.5*Math.sin(t*6),cs=G.cs;cx.save();
+ // glowing pulsing outline
+ cx.strokeStyle=`rgba(255,225,70,${.6+p*.4})`;cx.lineWidth=Math.max(3,cs*.07);cx.shadowColor='#ffd23f';cx.shadowBlur=14+p*10;const r=cs*(.56+p*.06);rr(cx,x-r,y-r,r*2,r*2,cs*.22);cx.stroke();
+ // expanding ripple
+ const u=(t%1.1)/1.1;cx.shadowBlur=0;cx.strokeStyle=`rgba(255,240,160,${(1-u)*.8})`;cx.lineWidth=2;const r2=r*(1+u*.5);rr(cx,x-r2,y-r2,r2*2,r2*2,cs*.25);cx.stroke();
+ // big bouncing arrow in the exit direction
+ const [dx,dy]=FL.DIRS[v.d];const off=cs*(.95+.18*Math.abs(Math.sin(t*5)));cx.translate(x+dx*off,y+dy*off);cx.rotate(Math.atan2(dy,dx));const a=cs*.36;
+ cx.fillStyle='#ffd23f';cx.strokeStyle='rgba(90,50,0,.9)';cx.lineWidth=Math.max(2,cs*.04);cx.shadowColor='rgba(0,0,0,.45)';cx.shadowBlur=6;
+ cx.beginPath();cx.moveTo(a,0);cx.lineTo(0,-a*.75);cx.lineTo(0,-a*.32);cx.lineTo(-a*.8,-a*.32);cx.lineTo(-a*.8,a*.32);cx.lineTo(0,a*.32);cx.lineTo(0,a*.75);cx.closePath();cx.fill();cx.shadowBlur=0;cx.stroke();cx.restore();};
 window.drawHand=function(){};
 // ---------- Pointing hand ----------
 function hand(c,x,y,s,t){const u=(t%1.2)/1.2;const press=u<.25?u/.25:u<.45?1-(u-.25)/.2:0;c.save();c.globalAlpha=.7*(1-u);c.strokeStyle='#fff';c.lineWidth=3;c.beginPath();c.arc(x,y,s*.25*(1+u*1.4),0,TAU);c.stroke();c.restore();

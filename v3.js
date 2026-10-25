@@ -155,7 +155,7 @@ const _v2veh=V2VEH;
 const _onBump=window.onBump;window.onBump=function(vv,s){const f0=G.fire;_onBump(vv,s);const d=G.fire-f0;if(d>0){G.fire=f0+d*PERK.E[tierOf('E')];updHUD();}};
 const _checkPass=window.checkPass;window.checkPass=function(vv){const f0=G.fire;_checkPass(vv);const d=f0-G.fire;if(d>0){G.fire=Math.max(0,G.fire-d*(PERK.T[tierOf('T')]-1));updHUD();}};
 const _sl=window.startLevel;window.startLevel=function(i,sk){const prev=G;closeOv();_sl(i,sk);if(G&&G!==prev){const a=tierOf('A');G.freeHints=a>=3?2:a>=1?1:0;G.shield=a>=2?1:0;G.hydUsed=0;updHUD();ttImg();}};
-const _uh=window.useHelp;window.useHelp=function(kind){if(kind==='hint'&&G&&G.state==='play'&&G.freeHints>0){const f=FL.free(G.st);if(f[0]){G.freeHints--;G.hint={id:f[0].id,t:0};AU.rescue();toast(T('freeHint'));updHUD();}return;}_uh(kind);};
+const _uh=window.useHelp;window.useHelp=function(kind){if(kind==='hint'&&G&&G.state==='play'&&G.freeHints>0){const f=FL.free(G.st);if(G.hint){G.hint.t=0;toast(T('hintOn'));return;}if(f[0]){G.freeHints--;G.hint={id:f[0].id,t:0};AU.rescue();toast(T('freeHint'));updHUD();}else toast(T('noHint'));return;}_uh(kind);};
 const _uhud=window.updHUD;window.updHUD=function(){_uhud();if(!G)return;const b=$('bHint');if(b){const fh=G.freeHints>0;b.classList.toggle('free',fh);if(fh)b.disabled=false;}};
 const _tap3=window.tapCell;window.tapCell=function(x,y){const r=_tap3(x,y);if(r==='bump'&&G&&G.shield>0){G.shield--;G.hearts++;toast(T('shield'));updHUD();}return r;};
 window.__ft.tap=window.tapCell;

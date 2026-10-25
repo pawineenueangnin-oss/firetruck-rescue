@@ -17,7 +17,10 @@ const Ads={lastInter:Date.now(),minGap:90000,cleared:0,
   if(this.cleared<2||n-this.lastInter<this.minGap)return false;this.cleared=0;this.lastInter=n;
   try{if(window.AndroidAds&&AndroidAds.showInterstitial){AndroidAds.showInterstitial();}else LOG('AdsStub: interstitial (no ad on web)');}catch(e){}return true;},
  rewarded(){return new Promise(res=>{if(!(window.AndroidAds&&AndroidAds.showRewarded)){LOG('AdsStub: rewarded granted without ad');setTimeout(()=>res(true),300);return;}
-   window.onRewardedResult=ok=>{window.onRewardedResult=null;res(!!ok);};try{AndroidAds.showRewarded();}catch(e){res(false);}});}};
+   let done=false,earned=false,tm=0;const fin=ok=>{if(done)return;done=true;clearTimeout(tm);['onRewardedResult','onRewardEarned','onRewardedClosed','onRewardedFailed'].forEach(k=>window[k]=null);res(!!ok);};
+   try{if(AndroidAds.isRewardedReady&&!AndroidAds.isRewardedReady()){fin(false);return;}}catch(e){}
+   window.onRewardedResult=ok=>fin(ok);window.onRewardEarned=()=>{earned=true;};window.onRewardedClosed=()=>setTimeout(()=>fin(earned),50);window.onRewardedFailed=()=>fin(false);
+   tm=setTimeout(()=>fin(earned),90000);try{const r=AndroidAds.showRewarded();if(r===false)fin(false);}catch(e){fin(false);}});}};
 // ---------- Audio ----------
 const AU={ac:null,m:null,s:null,next:0,step:0,roar:null,sirenUntil:0,nb:null,
  init(){if(!this.ac){try{const A=window.AudioContext||window.webkitAudioContext;this.ac=new A();const ac=this.ac;
@@ -272,8 +275,10 @@ function tapCell(x,y){if(!G||G.state!=='play')return'nostate';const o=G.st.occ[x
  G.hearts--;return'bump';}
 function useHelp(kind){if(!G||G.state==='win')return;if(G.help>=2){toast(T('limit'));return;}
  if(kind==='undo'&&(!G.hist.length||busy())){if(!G.hist.length)toast(T('noUndo'));return;}if(kind==='heart'&&G.hearts>=3)return;
- Ads.rewarded().then(ok=>{if(!ok||!G)return;G.help++;
-  if(kind==='hint'){const f=FL.free(G.st);if(f[0]){G.hint={id:f[0].id,t:0};AU.rescue();}}
+ if(kind==='hint'){if(G.state!=='play')return;if(G.hint){G.hint.t=0;toast(T('hintOn'));return;}if(!FL.free(G.st).length){toast(T('noHint'));return;}}
+ if(G.adBusy)return;G.adBusy=1;const g0=G;
+ Ads.rewarded().then(ok=>{if(g0)g0.adBusy=0;if(!G||G!==g0)return;if(!ok){toast(T('adFail'));return;}G.help++;
+  if(kind==='hint'){const f=FL.free(G.st);if(f[0]){G.hint={id:f[0].id,t:0};AU.rescue();toast(T('hintOn'));}else toast(T('noHint'));}
   else if(kind==='undo'){restore(G.hist.pop());AU.heart();}
   else if(kind==='heart'){G.hearts=Math.min(3,G.hearts+1);AU.heart();if(G.state==='lose'){G.state='play';$('pop').style.display='none';}markHeart('gain');}
   updHUD();});}
