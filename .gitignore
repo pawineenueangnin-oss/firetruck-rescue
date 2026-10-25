@@ -1,0 +1,4 @@
+node_modules/
+_*.js
+draft*.json
+gen*.log
