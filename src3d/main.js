@@ -2,6 +2,7 @@
 // Plugs into the existing 2D game: game logic/state stays in game.js/v2/v3; this file only replaces drawing.
 // Falls back to the 2D renderer when WebGL is missing, the context is lost, or ?r=2d.
 import * as THREE from 'three';
+import {makeUI3} from './ui3.js';
 import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import * as MD from './models.js';
@@ -427,10 +428,18 @@ function init(){
  const _rb=window.renderBoard,_rs=window.renderScene,_tt=window.drawTT;
  const live=()=>R3.ok&&!R3.lost&&!R3.off;
  let fpsT=0,fpsN=0,slow=0;
- window.renderBoard=function(){if(!live())return _rb();try{drawBoard3D();
+ window.renderBoard=function(){if(!live())return _rb();if(UI.tOn)UI.titleDispose();if(resUp())return;try{drawBoard3D();
    if(G.hint&&window.drawHint)window.drawHint();if(G.i===0&&!G.firstTap&&G.state==='play')drawHand();drawImpacts();R3.frames++;}catch(e){LOG3('board3d error → 2D',e&&e.stack);R3.off=true;_rb();}};
- window.renderScene=function(){if(!live())return _rs();try{drawScene3D();}catch(e){LOG3('scene3d error → 2D',e&&e.stack);R3.off=true;_rs();}};
+ window.renderScene=function(){if(!live())return _rs();if(resUp())return;try{drawScene3D();}catch(e){LOG3('scene3d error → 2D',e&&e.stack);R3.off=true;_rs();}};
  R3.tt=drawTT3;
+ // ---- v9: real 3D menu / result / rank-up screens ----
+ [GLOW,SOFT,SMOKE,ENV].forEach(t=>{if(t&&t.userData)t.userData.keep=1;});
+ const UI=makeUI3({R,prep,blit,ENV,model,instance,siren,figure,pose,flameMat,glowMat,SOFT,SMOKE,hi,skyTex,buildBuilding,CH,SM,tierOf3});
+ R3.ui={ok:()=>live()&&!UI.off&&!/ui=2d/.test(location.search),fail(e){LOG3('ui3 error → 2D',e&&e.stack);UI.off=true;},
+  badge(c,size,rk,ang){try{UI.badge(c,size,rk,ang);return true;}catch(e){R3.ui.fail(e);return false;}},
+  res(o){try{return UI.res(o);}catch(e){R3.ui.fail(e);return null;}},rank(rk){try{return UI.rank(rk);}catch(e){R3.ui.fail(e);return null;}},U:UI.U,titleDispose:()=>UI.titleDispose()};
+ const _dts=window.drawTitleScene;window.drawTitleScene=function(){if(MODE==='title'&&R3.ui.ok()){try{UI.title(cx,W,H,DT);return;}catch(e){R3.ui.fail(e);}}if(UI.tOn)UI.titleDispose();return _dts();};
+ const resUp=()=>{const e=document.getElementById('res');return e&&e.style.display==='block';};
  R3.shot=function(w,h,back,fov){drawScene3D();const cam=S3D.cam,a0=cam.aspect,f0=cam.fov;const d=new THREE.Vector3();cam.getWorldDirection(d);cam.position.addScaledVector(d,-(back||0));cam.aspect=w/h;if(fov)cam.fov=fov;cam.updateProjectionMatrix();cam.updateMatrixWorld();R.setSize(w,h,false);R.setViewport(0,0,w,h);R.setScissorTest(false);R.setClearColor(0x000000,1);R.clear(true,true,true);R.render(S3D.scene,cam);const u=R.domElement.toDataURL('image/jpeg',.88);cam.aspect=a0;cam.fov=f0;cam.updateProjectionMatrix();return u;};
  window.drawTT=function(c,type,tier,x,y,s,ang,o){if(live()&&'EKTA'.includes(type)){try{if(drawTT3(c,type,tier,x,y,s,ang,o))return true;}catch(e){LOG3('tt3d error',e&&e.message);}}return _tt(c,type,tier,x,y,s,ang,o);};
  // adaptive resolution: drop pixel ratio if frames are slow
