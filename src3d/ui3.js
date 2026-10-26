@@ -11,8 +11,8 @@ function perf(dt){fpsA=fpsA*.95+dt*.05;if(fpsA>1/38){slowT+=dt;if(slowT>2.5&&!U.
 function disp(o){if(!o)return;if(o.userData&&o.userData.keep){if(o.parent)o.parent.remove(o);return;}o.children.slice().forEach(disp);if(o.geometry)o.geometry.dispose();const m=o.material;
  if(m)(Array.isArray(m)?m:[m]).forEach(mm=>{for(const k in mm){const v=mm[k];if(v&&v.isTexture&&!(v.userData&&v.userData.keep))v.dispose();}mm.dispose();});}
 function dispScene(s){if(!s)return;if(s.background&&s.background.isTexture)s.background.dispose();s.children.slice().forEach(disp);s.clear();}
-function render(c,w,h,passes,prFix){const pr=prFix||prr();const pw=Math.max(8,Math.round(w*pr)),ph=Math.max(8,Math.round(h*pr));prep(pw,ph);const ac=R.autoClear;R.autoClear=false;
- passes.forEach((p,i)=>{if(i)R.clearDepth();R.render(p[0],p[1]);});R.autoClear=ac;blit(c,pw,ph,0,0,w,h);}
+function render(c,w,h,passes,prFix){const pr=prFix||prr();const pw=Math.max(8,Math.round(w*pr)),ph=Math.max(8,Math.round(h*pr));prep(pw,ph);const ac=R.autoClear,tm=R.toneMapping,te=R.toneMappingExposure;R.autoClear=false;R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.12;
+ passes.forEach((p,i)=>{if(i)R.clearDepth();R.render(p[0],p[1]);});R.autoClear=ac;R.toneMapping=tm;R.toneMappingExposure=te;blit(c,pw,ph,0,0,w,h);}
 function cvTex(w,h,f,keep){const c=document.createElement('canvas');c.width=w;c.height=h;f(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;if(keep)t.userData.keep=1;return t;}
 const RAYS=cvTex(512,512,g=>{g.translate(256,256);for(let i=0;i<28;i++){g.rotate(TAU/28);const gr=g.createLinearGradient(0,0,256,0);gr.addColorStop(0,'rgba(255,255,255,.9)');gr.addColorStop(.6,'rgba(255,255,255,.25)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.beginPath();g.moveTo(0,0);const a=i%2?.04:.085;g.lineTo(256,-256*a);g.lineTo(256,256*a);g.fill();}},1);
 const SHAD=cvTex(128,128,g=>{const gr=g.createRadialGradient(64,64,0,64,64,64);gr.addColorStop(0,'rgba(0,0,0,.9)');gr.addColorStop(.5,'rgba(0,0,0,.45)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,128,128);},1);
@@ -46,10 +46,10 @@ function winTex(){return cvTex(64,128,(g,w,h)=>{g.fillStyle='#0d0f15';g.fillRect
 
 // ============ MAIN MENU ============
 let TI=null;
-function titleBuild(){const q=hi()&&!U.low;const s=new THREE.Scene();s.background=skyTex('#02040a','#6a2410');s.environment=ENV;s.environmentIntensity=.55;s.fog=new THREE.Fog(0x2a120c,26,95);
+function titleBuild(){const q=hi()&&!U.low;const s=new THREE.Scene();s.background=skyTex('#02040a','#6a2410');s.environment=ENV;s.environmentIntensity=.8;s.fog=new THREE.Fog(0x2a120c,26,95);
  s.add(new THREE.HemisphereLight(0x50608f,0x140808,.75));const moon=new THREE.DirectionalLight(0xa8bcff,1.3);moon.position.set(-8,14,12);s.add(moon);
  const rim=new THREE.DirectionalLight(0xff7a30,2.2);rim.position.set(5,7,-14);s.add(rim);const fireL=new THREE.PointLight(0xff5a18,90,90,1.05);fireL.position.set(-2,8,-22);s.add(fireL);
- const gm=new THREE.MeshStandardMaterial({color:0x07080b,roughness:.06,metalness:.9,transparent:true,opacity:q?.72:.95,envMapIntensity:.7});const gr=new THREE.Mesh(new THREE.PlaneGeometry(300,300),gm);gr.rotation.x=-Math.PI/2;gr.renderOrder=1;s.add(gr);
+ const gm=new THREE.MeshStandardMaterial({color:0x07080b,roughness:.06,metalness:.9,transparent:true,opacity:q?.86:.95,envMapIntensity:.9});const gr=new THREE.Mesh(new THREE.PlaneGeometry(300,300),gm);gr.rotation.x=-Math.PI/2;gr.renderOrder=1;s.add(gr);
  const lm=new THREE.MeshBasicMaterial({color:0xb89a40,transparent:true,opacity:.5});for(let i=-6;i<=6;i++){const l=new THREE.Mesh(new THREE.PlaneGeometry(2.4,.16),lm);l.rotation.x=-Math.PI/2;l.position.set(i*5,.012,5.5);l.renderOrder=2;s.add(l);}
  // skyline with lit windows; some towers burning
  const wt=winTex();const F=[];const nB=q?26:18;for(let i=0;i<nB;i++){const w=4+rnd()*6,h=(i%7===3?26:8)+rnd()*22,d=6;const t=wt.clone();t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(Math.max(1,Math.round(w/4)),Math.max(1,Math.round(h/6)));t.needsUpdate=true;
@@ -61,7 +61,7 @@ function titleBuild(){const q=hi()&&!U.low;const s=new THREE.Scene();s.backgroun
  const smoke=smokeSys(s,q?40:18,0x2a2422),emb=emberSys(q?220:90,0xffa040,.32);s.add(emb);
  // hero truck + mirror reflection on the wet road
  const tier=tierOf3('E');const tr=instance(model('E',tier),[8.6,8.6]);tr.userData.keep=1;tr.rotation.y=-.62;s.add(tr);tr.userData.glows.forEach(g=>g.scale.multiplyScalar(4.5));
- let mr=null;if(q){mr=instance(model('E',tier),[8.6,8.6]);mr.userData.keep=1;mr.rotation.y=-.62;mr.scale.y=-1;s.add(mr);mr.userData.glows.forEach(g=>g.scale.multiplyScalar(3.2));}
+ let mr=null;if(q){mr=instance(model('E',tier),[8.6,8.6]);mr.userData.keep=1;mr.rotation.y=-.62;mr.scale.y=-.5;s.add(mr);mr.userData.glows.forEach(g=>g.scale.multiplyScalar(1.6));}
  const sh=blob(10,4.6,.85);sh.rotation.z=.62;sh.renderOrder=3;s.add(sh);
  const red=new THREE.PointLight(0xff2a1a,0,22,1.3),blu=new THREE.PointLight(0x2a5aff,0,22,1.3);red.position.set(-1.6,3.6,1);blu.position.set(1.6,3.6,-1);s.add(red,blu);
  const streak=[0xff2a1a,0x3a6cff].map((c,i)=>{const sp=new THREE.Sprite(addM(SOFT,c,0));sp.position.set(i?2.2:-2.2,.05,3.2);sp.scale.set(1.4,6,1);s.add(sp);return sp;});

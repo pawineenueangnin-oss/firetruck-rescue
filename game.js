@@ -3,6 +3,29 @@
 const $=id=>document.getElementById(id);
 const cv=$('c'),cx=cv.getContext('2d');
 let W=360,H=640,DPR=1;
+// ================= AD CONFIG (edit here before release) =================
+// Exactly 3 AdMob ad units. The values below are GOOGLE'S PUBLIC TEST IDs only.
+// >>> Replace with this app's own AdMob unit IDs in the Android project before publishing. <<<
+// The Android side reads them via AndroidAds.configure(json) if it implements it.
+window.FT_AD_UNITS=window.FT_AD_UNITS||{
+ banner:      'ca-app-pub-3940256099942544/6300978111', // ft_banner_map_game  (TEST ID)
+ interstitial:'ca-app-pub-3940256099942544/1033173712', // ft_inter_level_end  (TEST ID)
+ rewarded:    'ca-app-pub-3940256099942544/5224354917'  // ft_reward_help_x2   (TEST ID)
+};
+// Ad preview mode: ?test=1 shows labelled mock ads at each placement (no real ads).
+// ?test=1&fill=fail|nofill simulates failures.
+(function(){const q=new URLSearchParams(location.search);if(q.get('test')!=='1'||window.AndroidAds)return;const fill=q.get('fill')||'ok';
+ const box=(cls,txt)=>{const d=document.createElement('div');d.className='adMock '+cls;d.innerHTML=txt;document.body.appendChild(d);return d;};let bn=null;
+ window.__adLog=[];const lg=k=>window.__adLog.push([k,Date.now()]);
+ window.AndroidAds={configure(){},
+  showBanner(){lg('banner');if(fill!=='ok')return;if(!bn)bn=box('adB','AD · Banner &nbsp;<b>ft_banner_map_game</b>&nbsp; 320×50');bn.style.display='flex';},
+  hideBanner(){if(bn)bn.style.display='none';},
+  showInterstitial(){lg('inter');if(fill!=='ok')return;const d=box('adI','<div>AD · Interstitial<br><b>ft_inter_level_end</b><br><small>full screen · after level end</small></div><button>✕</button>');d.querySelector('button').onclick=()=>d.remove();},
+  isRewardedReady(){return fill!=='nofill';},
+  showRewarded(){lg('reward');if(fill==='fail'){setTimeout(()=>window.onRewardedFailed&&window.onRewardedFailed(),200);return true;}
+   const d=box('adI','<div>AD · Rewarded<br><b>ft_reward_help_x2</b><br><small>watch to get the reward</small></div><button>✓</button>');d.querySelector('button').onclick=()=>{d.remove();window.onRewardEarned&&window.onRewardEarned();window.onRewardedClosed&&window.onRewardedClosed();};return true;}};
+ const st=document.createElement('style');st.textContent='.adMock{position:fixed;z-index:999;display:flex;align-items:center;justify-content:center;text-align:center;font:600 13px system-ui;color:#fff}.adB{left:0;right:0;bottom:env(safe-area-inset-bottom);height:56px;background:repeating-linear-gradient(45deg,#2a7a3a,#2a7a3a 10px,#2f8a42 10px,#2f8a42 20px);border-top:2px dashed #fff;pointer-events:none}.adI{inset:0;background:rgba(10,40,20,.96);font-size:18px}.adI button{position:absolute;top:14px;right:14px;width:44px;height:44px;border-radius:22px;border:0;font-size:20px}';document.head.appendChild(st);})();
+try{window.AndroidAds&&AndroidAds.configure&&AndroidAds.configure(JSON.stringify(window.FT_AD_UNITS));}catch(e){}
 const BANNER=()=>(window.AndroidAds&&window.AndroidAds.showBanner?56:0);
 const LOG=(...a)=>{try{console.log('[FiretruckRescue]',...a);}catch(e){}};
 const FL=FTLogic;

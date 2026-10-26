@@ -3,3 +3,4 @@ _*.js
 draft*.json
 gen*.log
 node_modules
+_v10.js

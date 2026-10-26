@@ -212,7 +212,7 @@ function polaroid(c,x,y,w,ch,t,label){const f=FAM[ch]||FAM[1];const im=IMG('img/
 const coinSvg='<svg class="coin" viewBox="0 0 24 24"><use href="#i-coin"/></svg>';
 function showResult(g){try{clearTimeout(tipH);if(G)G.tips=[];}catch(e){}try{const tp=document.getElementById("tip");if(tp){tp.classList.remove("on","show");tp.style.display="none";setTimeout(()=>{tp.style.display=""},50);}}catch(e){}const r=g.rew||calcRew(g,true);const ch=g.ch;const el=ovEl('res');el.className='ov3 res';el.style.display='block';$('pop').style.display='none';
  const li0=lvlInfo(r.xp0??S3.xp-r.xp),last=g.i>=LEVELS.length-1;const types=[...new Set(g.st.veh.map(v=>v.type).filter(t=>'EKTA'.includes(t)))];if(!types.length)types.push('E');
- const done=!!S3.dbl[g.i];
+ const done=!!S3.dbl[g.i]||(g.help||0)>=2;// rewarded cap: max 2 rewarded ads per level (hint/undo/heart/x2 combined)
  el.innerHTML=`<canvas id="rcv"></canvas><div class="rtop"><div class="rt">${T('win')}</div><div class="rs">${T('winSub')}</div></div>
  <div class="rpanel"><div class="rrow"><canvas id="rbadge" width="96" height="96"></canvas><div class="rk"><b id="rRank">${T('rk'+(rankOf(li0.L)+1))}</b><span id="rLv">${T('lvl')} ${li0.L}</span></div><div class="rcoins">${coinSvg}<b id="rCoin">${r.c0??S3.coins-r.coins}</b></div></div>
  <div class="xpb"><i id="rXp" style="width:${li0.cur/li0.need*100}%"></i><span id="rXpT">+0 ${T('xp')}</span></div>
@@ -263,7 +263,7 @@ function showResult(g){try{clearTimeout(tipH);if(G)G.tips=[];}catch(e){}try{cons
  const go=()=>{AU.click();closeOv();afterLevel(g);};
  $('rGo').onclick=go;$('rRe').onclick=()=>{AU.click();closeOv();Ads.maybeInterstitial(g.i+1);startLevel(g.i);};$('rMap').onclick=()=>{AU.click();closeOv();Ads.maybeInterstitial(g.i+1);showMap();};
  $('rGar').onclick=()=>{AU.click();showGarage(()=>showResultStatic(g));};
- const db=$('rDbl');if(db)db.onclick=()=>{AU.click();Ads.rewarded().then(okk=>{if(!okk)return;S3.dbl[g.i]=1;const c0=S3.coins;S3.xp+=r.xp;S3.coins+=r.coins;persist();db.remove();spd=1;xpBase=r.xp;cFrom=c0;cTo=S3.coins;const x0=S3.xp-r.xp;anXp(x0,S3.xp,1.2,newShow);});};}
+ const db=$('rDbl');if(db)db.onclick=()=>{if(db.disabled)return;AU.click();db.disabled=true;Ads.rewarded().then(okk=>{db.disabled=false;if(!okk){toast(T('adFail'));return;}g.help=(g.help||0)+1;S3.dbl[g.i]=1;const c0=S3.coins;S3.xp+=r.xp;S3.coins+=r.coins;persist();db.remove();spd=1;xpBase=r.xp;cFrom=c0;cTo=S3.coins;const x0=S3.xp-r.xp;anXp(x0,S3.xp,1.2,newShow);});};}
 function showResultStatic(g){closeOv();const r=g.rew;if(r){r.xp0=S3.xp-0;r.c0=S3.coins;}g.rew=Object.assign({},r||calcRew(g,true),{xp:0,coins:0,xp0:S3.xp,c0:S3.coins});showResult(g);}
 // ---------- Game-over screen ----------
 function showGameOver(g){const el=ovEl('res');el.className='ov3 res lose';el.style.display='block';$('pop').style.display='none';
@@ -277,7 +277,7 @@ function showGameOver(g){const el=ovEl('res');el.className='ov3 res lose';el.sty
   const vs=Math.min(w*.26,sh*.36);drawTT(c,'E',tierOf('E'),w*.5,sh*.92,vs,TAU*6/16,{filter:'brightness(.7)'});
   for(let k=0;k<5;k++){const u=((t*.2+k/5)%1);c.globalAlpha=(1-u)*.25;c.fillStyle='#3a3438';c.beginPath();c.arc(w*(.2+k*.15),sh*(.6-u*.5),w*(.06+u*.15),0,TAU);c.fill();}c.globalAlpha=1;ps.draw(c);});
  const on=(id,f)=>{const e=$(id);if(e)e.onclick=()=>{AU.click();f();};};
- on('gHeart',()=>{Ads.rewarded().then(okk=>{if(!okk||!G)return;G.help++;G.hearts=Math.min(3,G.hearts+1);AU.heart();G.state='play';closeOv();updHUD();});});
+ on('gHeart',()=>{Ads.rewarded().then(okk=>{if(!okk){toast(T('adFail'));return;}if(!G)return;G.help++;G.hearts=Math.min(3,G.hearts+1);AU.heart();G.state='play';closeOv();updHUD();});});
  on('gRe',()=>{closeOv();startLevel(g.i);});on('gMap',()=>{closeOv();showMap();});on('gGar',()=>showGarage(()=>showGameOver(g)));}
 window.endPopup=function(winb){if(!G)return;if(winb)showResult(G);else showGameOver(G);};
 const _render=window.render;window.render=function(){const r=$('res'),gg=$('gar'),sl=$('slog');if((r&&r.style.display==='block')||(gg&&gg.style.display==='block')||(sl&&sl.style.display==='block'))return;_render();};
