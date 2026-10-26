@@ -6,7 +6,7 @@ const {R,prep,blit,ENV,model,instance,siren,figure,pose,flameMat,glowMat,SOFT,SM
 const TAU=Math.PI*2,cl=(v,a,b)=>v<a?a:v>b?b:v,rnd=Math.random;
 const eOut=u=>1-Math.pow(1-u,3),eBack=u=>{const c=1.70158;return 1+(c+1)*Math.pow(u-1,3)+c*Math.pow(u-1,2);};
 const U={off:false,low:false};let fpsA=1/60,slowT=0;
-const prr=()=>(hi()&&!U.low)?Math.min(window.devicePixelRatio||1,1.5,(window.R3&&R3.prCap)||2):1;
+const prr=()=>(hi()&&!U.low)?Math.min(window.devicePixelRatio||1,1.5,(window.R3&&R3.prCap)||2):Math.min(window.devicePixelRatio||1,1.25);
 function perf(dt){fpsA=fpsA*.95+dt*.05;if(fpsA>1/38){slowT+=dt;if(slowT>2.5&&!U.low){U.low=true;console.log('[R3] ui3 low-res');}}else slowT=0;}
 function disp(o){if(!o)return;if(o.userData&&o.userData.keep){if(o.parent)o.parent.remove(o);return;}o.children.slice().forEach(disp);if(o.geometry)o.geometry.dispose();const m=o.material;
  if(m)(Array.isArray(m)?m:[m]).forEach(mm=>{for(const k in mm){const v=mm[k];if(v&&v.isTexture&&!(v.userData&&v.userData.keep))v.dispose();}mm.dispose();});}

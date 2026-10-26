@@ -25,7 +25,7 @@ function init(){
  function ensure(pw,ph){const s=new THREE.Vector2();R.getSize(s);if(s.x<pw||s.y<ph)R.setSize(Math.max(s.x,pw,8),Math.max(s.y,ph,8),false);}
  function prep(pw,ph){ensure(pw,ph);R.setViewport(0,0,pw,ph);R.setScissor(0,0,pw,ph);R.setScissorTest(true);R.setClearColor(0,0);R.clear(true,true,true);}
  function blit(c,pw,ph,dx,dy,dw,dh){c.drawImage(cvs,0,cvs.height-ph,pw,ph,dx,dy,dw,dh);}
- const prRatio=()=>hi()?Math.min(DPR,R3.prCap||2):Math.min(DPR,1.1);
+ const prRatio=()=>hi()?Math.min(DPR,R3.prCap||2):Math.min(DPR,1.35);
  function radTex(stops,n=128){const c=document.createElement('canvas');c.width=c.height=n;const g=c.getContext('2d');const gr=g.createRadialGradient(n/2,n/2,0,n/2,n/2,n/2);stops.forEach(([o,col])=>gr.addColorStop(o,col));g.fillStyle=gr;g.fillRect(0,0,n,n);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;}
  const GLOW=radTex([[0,'rgba(255,255,255,1)'],[.25,'rgba(255,255,255,.55)'],[1,'rgba(255,255,255,0)']]);
  const SOFT=radTex([[0,'rgba(255,255,255,1)'],[.5,'rgba(255,255,255,.4)'],[1,'rgba(255,255,255,0)']],64);
@@ -444,7 +444,7 @@ function init(){
  R3.shot=function(w,h,back,fov){drawScene3D();const cam=S3D.cam,a0=cam.aspect,f0=cam.fov;const d=new THREE.Vector3();cam.getWorldDirection(d);cam.position.addScaledVector(d,-(back||0));cam.aspect=w/h;if(fov)cam.fov=fov;cam.updateProjectionMatrix();cam.updateMatrixWorld();R.setSize(w,h,false);R.setViewport(0,0,w,h);R.setScissorTest(false);R.setClearColor(0x000000,1);R.clear(true,true,true);R.render(S3D.scene,cam);const u=R.domElement.toDataURL('image/jpeg',.88);cam.aspect=a0;cam.fov=f0;cam.updateProjectionMatrix();return u;};
  window.drawTT=function(c,type,tier,x,y,s,ang,o){if(live()&&'EKTA'.includes(type)){try{if(drawTT3(c,type,tier,x,y,s,ang,o))return true;}catch(e){LOG3('tt3d error',e&&e.message);}}return _tt(c,type,tier,x,y,s,ang,o);};
  // adaptive resolution: drop pixel ratio if frames are slow
- const _u=window.update;window.update=function(dt){_u(dt);fpsT+=dt;fpsN++;if(fpsT>2){const f=fpsN/fpsT;R3.fps=f;fpsT=0;fpsN=0;if(live()&&MODE==='game'){if(f<45){slow++;if(slow>=2&&(R3.prCap||2)>1){R3.prCap=Math.max(1,(R3.prCap||2)-.5);slow=0;LOG3('adaptive pr',R3.prCap);}}else slow=0;}}};
+ const _u=window.update;window.update=function(dt){_u(dt);fpsT+=dt;fpsN++;if(fpsT>2){const f=fpsN/fpsT;R3.fps=f;fpsT=0;fpsN=0;if(live()&&MODE==='game'&&performance.now()-(window.__resumeT||0)>4000){if(f<40){slow++;fast=0;if(slow>=2&&(R3.prCap||2)>1.25){R3.prCap=Math.max(1.25,(R3.prCap||2)-.25);slow=0;LOG3('adaptive pr',R3.prCap);}}else{slow=0;if(f>54&&++fast>=3&&(R3.prCap||2)<2){R3.prCap=Math.min(2,(R3.prCap||2)+.25);fast=0;}}}}};let fast=0;
  R3.flags={setup:()=>{}};LOG3('3D renderer on',R.capabilities.isWebGL2?'webgl2':'webgl1');}
 function LOG3(...a){try{console.log('[R3]',...a);}catch(e){}}
 try{init();}catch(e){LOG3('init failed → 2D',e&&e.stack);window.R3.ok=false;}

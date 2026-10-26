@@ -476,7 +476,7 @@ function drawStory(){const sc=STORY.scene,lt=STORY.t-sc*STORY.dur,t=STORY.t;cons
 // ---------- Input ----------
 cv.addEventListener('pointerdown',e=>{AU.init();if(MODE!=='game'||!G)return;const pk=window.pickCell&&window.pickCell(e.clientX,e.clientY);const x=pk?pk[0]:Math.floor((e.clientX-G.bx)/G.cs),y=pk?pk[1]:Math.floor((e.clientY-G.by)/G.cs);if(x<0||y<0||x>=G.L.w||y>=G.L.h)return;tapCell(x,y);updHUD();});
 $('bHome').onclick=()=>{AU.click();showMap();};$('bHint').onclick=()=>{AU.click();useHelp('hint');};$('bUndo').onclick=()=>{AU.click();useHelp('undo');};$('bHeart').onclick=()=>{AU.click();useHelp('heart');};$('bSkip').onclick=()=>{AU.click();endStory();};
-document.addEventListener('visibilitychange',()=>{if(!AU.ac)return;if(document.hidden)AU.ac.suspend();else AU.ac.resume();});
+document.addEventListener('visibilitychange',()=>{window.__resumeT=performance.now();if(window.V2){V2.fpsBad=0;if(!document.hidden&&SAVE.gfx==='auto')V2.lowAuto=false;}if(!AU.ac)return;if(document.hidden)AU.ac.suspend();else AU.ac.resume();});
 // ---------- Loop ----------
 function resize(){DPR=Math.min(window.devicePixelRatio||1,3);W=innerWidth;H=innerHeight;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cv.style.width=W+'px';cv.style.height=H+'px';buildBG();buildSkyline();if(G)layout();}
 addEventListener('resize',resize);
@@ -486,3 +486,5 @@ setTimeout(()=>{const s=$('splash');s.style.opacity=0;setTimeout(()=>s.remove(),
 if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 // ---------- Test hooks (used by automated playtests) ----------
 window.__ft={start:startLevel,tap:tapCell,get G(){return G;},sim(sec){const n=Math.ceil(sec/(1/60));for(let i=0;i<n;i++)update(1/60);},next(){const f=FL.free(G.st);return f[0]?{x:f[0].x,y:f[0].y}:null;},blocked(){return G.st.veh.find(v=>!v.gone&&!FL.trace(G.st,v).ok);},showMap,showTitle,settings,useHelp,startStory,endStory,mode:()=>MODE,Ads,STORY,render};
+
+addEventListener('pageshow',()=>{window.__resumeT=performance.now();});addEventListener('resize',()=>{window.__resumeT=performance.now();});

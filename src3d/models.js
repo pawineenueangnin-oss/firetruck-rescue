@@ -48,7 +48,7 @@ function setM(k,c,r,m,e){const x=mat[k];x.color.setHex(c);x.roughness=r;x.metaln
 let LBS=1;function TIER(t){for(const k in BASE)setM(k,...BASE[k]);LBS=1;
  if(t===1){setM('red',0xd8161c,.22,.12);setM('redD',0xf2f2f0,.3,.1);setM('alu',0xe4e4e4,.15,1);}
  if(t===2){setM('red',0x9e0912,.16,.45);setM('redD',0x1a1a1e,.4,.3);setM('refl',0xe0b030,.25,.9,0x3a2a00);setM('alu',0xf0f0f0,.1,1);LBS=1.25;setM('white',0xf6f3ea,.18,.35);}
- if(t===3){setM('red',0x121317,.14,.6);setM('redD',0xd9a52a,.2,1);setM('refl',0xffcf4a,.2,1,0x4a3200);setM('chrome',0xffd36a,.1,1);setM('alu',0xc9a040,.18,1);LBS=1.35;setM('white',0xfaf6ec,.15,.3);setM('hose',0xffd36a,.3,.8);}};
+ if(t===3){setM('red',0xa3101a,.12,.55);setM('redD',0xd9a52a,.2,1);setM('refl',0xffcf4a,.2,1,0x4a3200);setM('chrome',0xffd36a,.1,1);setM('alu',0xc9a040,.18,1);LBS=1.35;setM('white',0xfaf6ec,.15,.3);setM('hose',0xffd36a,.3,.8);}};
 // ---------- geometry helpers ----------
 function add(g,me,x,y,z){me.position.set(x,y,z);me.castShadow=true;me.receiveShadow=true;g.add(me);return me;}
 function box(g,w,h,d,m,x,y,z,r=0.02){const rr=Math.min(r,w/2-1e-4,h/2-1e-4,d/2-1e-4);return add(g,new THREE.Mesh(rr>0.001?new RoundedBoxGeometry(w,h,d,3,rr):new THREE.BoxGeometry(w,h,d),m),x,y,z);}
