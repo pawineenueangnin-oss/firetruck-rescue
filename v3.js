@@ -293,7 +293,7 @@ const BEATS=[
 BEATS.forEach((b,i)=>{SEQS['s'+(i+1)]=[{im:b[0],kb:b[1],grade:b[2],fx:b[3],flip:!!b[4],cap:['s'+String(i+1).padStart(2,'0')],d:4.4,beat:i+1}];});
 // epilogue shot before credits
 if(!SEQS.ending.some(s=>s.ep)){const ci=SEQS.ending.findIndex(s=>s.credits);SEQS.ending.splice(ci,0,{im:'e1',cap:['ep1'],d:5.4,kb:[.5,.55,1.05,.5,.45,1.25],fx:'confetti',grade:'gold',ep:1});}
-function afterLevel(g){const i=g.i;const next=()=>{if(isLastLv(i)){playEnding();return;}Ads.maybeInterstitial(i+1);startLevel(i+1);};
+function afterLevel(g){const i=g.i;if(!isLastLv(i))Ads.maybeInterstitial(i+1);const next=()=>{if(isLastLv(i)){playEnding();return;}startLevel(i+1);};
  const beat=()=>{if(!S3.beats[i]||window.__ft.alwaysBeat){S3.beats[i]=1;persist();playSeq('s'+(i+1),next);}else next();};
  if(g.L.boss&&!isLastLv(i)&&SEQS['b'+g.ch]&&!S3.boss[g.ch]){S3.boss[g.ch]=1;persist();playSeq('b'+g.ch,beat);}else beat();}
 const GRADE={night:[['multiply','rgba(110,130,190,.5)']],dawn:[['screen','rgba(255,170,90,.22)']],warm:[['screen','rgba(255,130,50,.14)'],['multiply','rgba(255,220,190,.9)']],cool:[['multiply','rgba(150,175,215,.7)']],

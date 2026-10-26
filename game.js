@@ -12,19 +12,37 @@ window.FT_AD_UNITS=window.FT_AD_UNITS||{
  interstitial:'ca-app-pub-3940256099942544/1033173712', // ft_inter_level_end  (TEST ID)
  rewarded:    'ca-app-pub-3940256099942544/5224354917'  // ft_reward_help_x2   (TEST ID)
 };
-// Ad preview mode: ?test=1 shows labelled mock ads at each placement (no real ads).
-// ?test=1&fill=fail|nofill simulates failures.
-(function(){const q=new URLSearchParams(location.search);if(q.get('test')!=='1'||window.AndroidAds)return;const fill=q.get('fill')||'ok';
+// Ad preview mode: ?test=1 shows labelled mock ads at each placement (no real ads). Persists in localStorage
+// (survives reloads / home-screen launch); ?test=0 turns it off. &fill=fail|nofill simulates failures; &fast=0 = realistic interstitial cap.
+(function(){const q=new URLSearchParams(location.search);let ls={};try{ls=JSON.parse(localStorage.getItem('ft_adtest')||'null')||{};}catch(e){}
+ if(q.get('test')==='0'){try{localStorage.removeItem('ft_adtest');}catch(e){}return;}
+ if(q.get('test')==='1'){ls={on:1,fill:q.get('fill')||'ok',fast:q.get('fast')==='0'?0:1};try{localStorage.setItem('ft_adtest',JSON.stringify(ls));}catch(e){}}
+ if(!ls.on||window.AndroidAds)return;const fill=ls.fill||'ok';window.__adTest={fast:ls.fast!==0,fill};
  const box=(cls,txt)=>{const d=document.createElement('div');d.className='adMock '+cls;d.innerHTML=txt;document.body.appendChild(d);return d;};let bn=null;
  window.__adLog=[];const lg=k=>window.__adLog.push([k,Date.now()]);
  window.AndroidAds={configure(){},
-  showBanner(){lg('banner');if(fill!=='ok')return;if(!bn)bn=box('adB','AD · Banner &nbsp;<b>ft_banner_map_game</b>&nbsp; 320×50');bn.style.display='flex';},
+  showBanner(){lg('banner');if(fill!=='ok')return;if(!bn)bn=box('adB','AD TEST · Banner &nbsp;<b>ft_banner_map_game</b>&nbsp; 320×50');bn.style.display='flex';},
   hideBanner(){if(bn)bn.style.display='none';},
-  showInterstitial(){lg('inter');if(fill!=='ok')return;const d=box('adI','<div>AD · Interstitial<br><b>ft_inter_level_end</b><br><small>full screen · after level end</small></div><button>✕</button>');d.querySelector('button').onclick=()=>d.remove();},
+  showInterstitial(){lg('inter');if(fill!=='ok'||document.querySelector('.adMock.adI'))return;const d=box('adI','<div><div class="adT">AD TEST · Interstitial</div><b>ft_inter_level_end</b><br><small>full screen · shown after level end (from level 3)</small></div><button class="adX">✕</button>');d.querySelector('button').onclick=()=>d.remove();},
   isRewardedReady(){return fill!=='nofill';},
   showRewarded(){lg('reward');if(fill==='fail'){setTimeout(()=>window.onRewardedFailed&&window.onRewardedFailed(),200);return true;}
-   const d=box('adI','<div>AD · Rewarded<br><b>ft_reward_help_x2</b><br><small>watch to get the reward</small></div><button>✓</button>');d.querySelector('button').onclick=()=>{d.remove();window.onRewardEarned&&window.onRewardEarned();window.onRewardedClosed&&window.onRewardedClosed();};return true;}};
- const st=document.createElement('style');st.textContent='.adMock{position:fixed;z-index:999;display:flex;align-items:center;justify-content:center;text-align:center;font:600 13px system-ui;color:#fff}.adB{left:0;right:0;bottom:env(safe-area-inset-bottom);height:56px;background:repeating-linear-gradient(45deg,#2a7a3a,#2a7a3a 10px,#2f8a42 10px,#2f8a42 20px);border-top:2px dashed #fff;pointer-events:none}.adI{inset:0;background:rgba(10,40,20,.96);font-size:18px}.adI button{position:absolute;top:14px;right:14px;width:44px;height:44px;border-radius:22px;border:0;font-size:20px}';document.head.appendChild(st);})();
+   const d=box('adI','<div><div class="adT">AD TEST · Rewarded</div><b>ft_reward_help_x2</b><br><small>x2 coins · hint · undo · +1 heart</small><br><br><span class="adW">▶ watching… 3</span><br><button class="adC" disabled>Claim reward</button><br><button class="adS">Skip (no reward)</button></div>');
+   let n=3;const w=d.querySelector('.adW'),c=d.querySelector('.adC');const iv=setInterval(()=>{n--;if(n>0)w.textContent='▶ watching… '+n;else{clearInterval(iv);w.textContent='✓ finished';c.disabled=false;}},1000);
+   c.onclick=()=>{d.remove();window.onRewardEarned&&window.onRewardEarned();window.onRewardedClosed&&window.onRewardedClosed();};
+   d.querySelector('.adS').onclick=()=>{clearInterval(iv);d.remove();window.onRewardedClosed&&window.onRewardedClosed();};return true;}};
+ const st=document.createElement('style');st.textContent='.adMock{position:fixed;z-index:2147483000;display:flex;align-items:center;justify-content:center;text-align:center;font:600 13px system-ui,sans-serif;color:#fff}.adB{left:0;right:0;bottom:env(safe-area-inset-bottom);height:56px;background:repeating-linear-gradient(45deg,#2a7a3a,#2a7a3a 10px,#2f8a42 10px,#2f8a42 20px);border-top:2px dashed #fff;pointer-events:none}.adI{inset:0;background:rgba(10,40,20,.97);font-size:18px;padding:20px}.adT{font-size:22px;font-weight:900;color:#ffe27a;margin-bottom:8px}.adI button{font:700 16px system-ui;border:0;border-radius:14px;padding:10px 18px;margin-top:8px}.adX{position:absolute;top:calc(14px + env(safe-area-inset-top));right:14px;width:44px;height:44px;padding:0!important;border-radius:22px!important}.adC{background:#ffd23f}.adC:disabled{opacity:.4}.adS{background:#555;color:#fff}'
+ +'#adChip{position:fixed;z-index:2147483001;top:calc(1px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);font:800 10px system-ui;color:#000;background:#ffd23f;border-radius:0 0 10px 10px;padding:2px 9px;opacity:.92;border:1px solid #000;box-shadow:0 2px 6px rgba(0,0,0,.5)}#adPan{position:fixed;z-index:2147483001;top:calc(22px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:rgba(0,0,0,.88);border:1px solid #ffd23f;border-radius:14px;padding:8px;display:none;flex-direction:column;gap:6px;width:200px}#adPan.on{display:flex}#adPan button{font:700 13px system-ui;border:0;border-radius:10px;padding:9px;background:#2f8a42;color:#fff}#adPan .off{background:#7a2a2a}';
+ document.head.appendChild(st);
+ const ui=()=>{const ch=document.createElement('button');ch.id='adChip';ch.textContent='AD TEST MODE ▾';const pn=document.createElement('div');pn.id='adPan';
+  pn.innerHTML='<button data-k="b">Show / hide banner</button><button data-k="i">Show interstitial</button><button data-k="r">Show rewarded</button><button data-k="o" class="off">Turn test mode off</button>';
+  ch.onclick=e=>{e.stopPropagation();pn.classList.toggle('on');};pn.onclick=e=>{const k=e.target.dataset&&e.target.dataset.k;if(!k)return;e.stopPropagation();pn.classList.remove('on');
+   if(k==='b'){if(bn&&bn.style.display!=='none')AndroidAds.hideBanner();else AndroidAds.showBanner();}
+   else if(k==='i')AndroidAds.showInterstitial();
+   else if(k==='r'){window.onRewardEarned=()=>{try{toast('Reward granted (test)');}catch(e){}};window.onRewardedClosed=()=>{window.onRewardEarned=null;};AndroidAds.showRewarded();}
+   else if(k==='o'){try{localStorage.removeItem('ft_adtest');}catch(e){}location.href=location.pathname+'?test=0';}};
+  ['pointerdown','touchstart'].forEach(ev=>{ch.addEventListener(ev,e=>e.stopPropagation());pn.addEventListener(ev,e=>e.stopPropagation());});
+  document.body.appendChild(ch);document.body.appendChild(pn);};
+ if(document.body)ui();else document.addEventListener('DOMContentLoaded',ui);})();
 try{window.AndroidAds&&AndroidAds.configure&&AndroidAds.configure(JSON.stringify(window.FT_AD_UNITS));}catch(e){}
 const BANNER=()=>(window.AndroidAds&&window.AndroidAds.showBanner?56:0);
 const LOG=(...a)=>{try{console.log('[FiretruckRescue]',...a);}catch(e){}};
@@ -37,7 +55,7 @@ function persist(){try{localStorage.setItem('ft_save',JSON.stringify(SAVE));}cat
 const Ads={lastInter:Date.now(),minGap:90000,cleared:0,
  banner(show){try{if(window.AndroidAds){show?AndroidAds.showBanner&&AndroidAds.showBanner():AndroidAds.hideBanner&&AndroidAds.hideBanner();}}catch(e){}},
  maybeInterstitial(levelNo){if(levelNo<3)return false;this.cleared++;const n=Date.now();
-  if(this.cleared<2||n-this.lastInter<this.minGap)return false;this.cleared=0;this.lastInter=n;
+  if(window.__adTest&&__adTest.fast&&n-this.lastInter<2500)return false;if(!(window.__adTest&&__adTest.fast)&&(this.cleared<2||n-this.lastInter<this.minGap))return false;this.cleared=0;this.lastInter=n;
   try{if(window.AndroidAds&&AndroidAds.showInterstitial){AndroidAds.showInterstitial();}else LOG('AdsStub: interstitial (no ad on web)');}catch(e){}return true;},
  rewarded(){return new Promise(res=>{if(!(window.AndroidAds&&AndroidAds.showRewarded)){LOG('AdsStub: rewarded granted without ad');setTimeout(()=>res(true),300);return;}
    let done=false,earned=false,tm=0;const fin=ok=>{if(done)return;done=true;clearTimeout(tm);['onRewardedResult','onRewardEarned','onRewardedClosed','onRewardedFailed'].forEach(k=>window[k]=null);res(!!ok);};
