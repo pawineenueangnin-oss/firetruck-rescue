@@ -10,7 +10,7 @@ const ttImg=()=>IMG('sprites/tt.webp');
 // ---------- Save (v3 fields + migration from v1/v2 progress) ----------
 const UPC=[80,200,420];
 function lvlInfo(xp){let L=1,need=110;while(xp>=need){xp-=need;L++;need=80+L*30;}return{L,cur:xp,need};}
-const rankOf=L=>L>=14?4:L>=10?3:L>=6?2:L>=3?1:0;
+const rankOf=L=>L>=40?7:L>=30?6:L>=21?5:L>=14?4:L>=10?3:L>=6?2:L>=3?1:0;
 const SKIN_LV=[1,3,6,10],SIREN_LV=[1,2,5];
 function migrate(){const v={ver:3,xp:0,coins:0,fleet:{E:0,K:0,T:0,A:0},skin:0,siren:0,beats:{},boss:{},dbl:{},seenNew:{}};
  (SAVE.stars||[]).forEach((s,i)=>{if(s>0){v.xp+=60+s*35+(LEVELS[i]&&LEVELS[i].boss?60:0);v.coins+=25+s*10;v.beats[i]=1;}});
@@ -166,9 +166,9 @@ const _sir=AU.siren;AU.siren=function(dur,p0,p1){if(!S3.siren)return _sir.call(A
  if(S3.siren===1){for(let k=0;k*.17<dur;k++){o.frequency.setValueAtTime(720,now+k*.17);o.frequency.linearRampToValueAtTime(1500,now+k*.17+.16);}}else{for(let k=0;k*.48<dur;k++)o.frequency.setValueAtTime(k%2?640:960,now+k*.48);}
  o.start(now);o.stop(now+dur+.05);};
 // ---------- Rewards ----------
-function calcRew(g,first){const stars=clamp(g.hearts,1,3),people=g.people,hyd=g.hydVis?g.hydVis.filter(h=>h.gone).length:0,boss=!!g.L.boss;const m=(1+PERK.K[tierOf('K')])*(first?1:.5);
+function calcRew(g,first){const stars=clamp(g.hearts,1,3),people=g.people,hyd=g.hydVis?g.hydVis.filter(h=>h.gone).length:0,boss=!!g.L.boss;const em=g.L.endless?1.1+Math.min(.9,(g.L.zone||0)*.05):1;const m=(1+PERK.K[tierOf('K')])*(first?1:.5)*em;
  const parts=[['bonusStar',stars*25],['bonusPpl',people*6],['bonusHrt',stars*10],['bonusHyd',hyd*8]];if(boss)parts.push(['bossB',60]);
- const xp=Math.round((60+parts.reduce((a,p)=>a+p[1],0))*m);const coins=Math.round((20+stars*10+people*2+(boss?40:0))*(first?1:.5));return{stars,people,hyd,boss,first,xp,coins,parts,m};}
+ const xp=Math.round((60+parts.reduce((a,p)=>a+p[1],0))*m);const coins=Math.round((20+stars*10+people*2+(boss?40:0))*(first?1:.5)*em);return{stars,people,hyd,boss,first,xp,coins,parts,m};}
 const _win=window.win;window.win=function(){const g=G;const first=!(SAVE.stars[g.i]>0);_win();const r=calcRew(g,first);r.xp0=S3.xp;r.c0=S3.coins;S3.xp+=r.xp;S3.coins+=r.coins;persist();g.rew=r;LOG('reward',JSON.stringify({xp:r.xp,coins:r.coins,lv:lvlInfo(S3.xp).L}));};
 function newItems(xp0,xp1){const a=lvlInfo(xp0).L,b=lvlInfo(xp1).L,out=[];if(rankOf(b)>rankOf(a))out.push(['rank',T('rk'+(rankOf(b)+1))]);
  SKIN_LV.forEach((l,i)=>{if(i&&a<l&&b>=l)out.push(['skin',T('sk'+i)]);});SIREN_LV.forEach((l,i)=>{if(i&&a<l&&b>=l)out.push(['siren',T('sr'+i)]);});
@@ -199,10 +199,10 @@ function medal(c,x,y,r,kind,t){const M={3:['#fff2a8','#ffcc33','#b37400'],2:['#f
  c.lineWidth=r*.1;c.strokeStyle=M[2];c.beginPath();c.arc(x,y,r*.82,0,TAU);c.stroke();star5(c,x,y,r*.5);c.fillStyle=M[2];c.fill();star5(c,x,y-r*.04,r*.46);c.fillStyle=M[0];c.fill();
  // shine sweep
  c.save();c.beginPath();c.arc(x,y,r,0,TAU);c.clip();const sx=x-r*2+((t*.6)%2)*r*4;const sg=c.createLinearGradient(sx-r*.3,0,sx+r*.3,0);sg.addColorStop(0,'rgba(255,255,255,0)');sg.addColorStop(.5,'rgba(255,255,255,.55)');sg.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=sg;c.fillRect(x-r,y-r,r*2,r*2);c.restore();c.restore();}
-function rankBadge(c,x,y,r,rk){c.save();const cols=[['#9aa3b2','#5b6475'],['#e0533a','#8f1d10'],['#3a8ee0','#123f80'],['#ffcc33','#a06a00'],['#ffe680','#c48a00']][rk];
+function rankBadge(c,x,y,r,rk){c.save();const cols=[['#9aa3b2','#5b6475'],['#e0533a','#8f1d10'],['#3a8ee0','#123f80'],['#ffcc33','#a06a00'],['#ffe680','#c48a00'],['#b070ff','#3e1484'],['#36e0a6','#0a5e40'],['#ff5a7a','#6e0a24']][Math.max(0,Math.min(7,rk))];
  c.beginPath();for(let k=0;k<6;k++){const a=-Math.PI/2+k*TAU/6;c.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r);}c.closePath();const g=c.createLinearGradient(x,y-r,x,y+r);g.addColorStop(0,cols[0]);g.addColorStop(1,cols[1]);c.fillStyle=g;c.fill();c.lineWidth=r*.12;c.strokeStyle='rgba(255,255,255,.8)';c.stroke();
- c.fillStyle='#fff';for(let k=0;k<=rk;k++){const yy=y+r*.35-k*r*.28;c.beginPath();c.moveTo(x-r*.5,yy);c.lineTo(x,yy-r*.22);c.lineTo(x+r*.5,yy);c.lineTo(x+r*.5,yy+r*.1);c.lineTo(x,yy-r*.12);c.lineTo(x-r*.5,yy+r*.1);c.fill();}
- if(rk===4){star5(c,x,y-r*.62,r*.22);c.fillStyle='#fff';c.fill();}c.restore();}
+ c.fillStyle='#fff';for(let k=0;k<=Math.min(rk,4);k++){const yy=y+r*.35-k*r*.28;c.beginPath();c.moveTo(x-r*.5,yy);c.lineTo(x,yy-r*.22);c.lineTo(x+r*.5,yy);c.lineTo(x+r*.5,yy+r*.1);c.lineTo(x,yy-r*.12);c.lineTo(x-r*.5,yy+r*.1);c.fill();}
+ if(rk>=4){const ns=rk-3;for(let q=0;q<ns;q++){star5(c,x+(q-(ns-1)/2)*r*.42,y-r*.62,r*(ns>1?.17:.22));c.fillStyle='#fff';c.fill();}}c.restore();}
 window.rankBadge=rankBadge;
 const FAM={1:['b1',.45,.42,1.25],2:['b2',.5,.45,1.2],3:['b3',.5,.5,1.15],4:['b4',.45,.5,1.2],5:['e3',.5,.45,1.15]};
 function polaroid(c,x,y,w,ch,t,label){const f=FAM[ch]||FAM[1];const im=IMG('img/'+f[0]+'.jpg');const h=w*1.12;c.save();c.translate(x,y);c.rotate(.07);c.shadowColor='rgba(0,0,0,.6)';c.shadowBlur=18;c.shadowOffsetY=8;c.fillStyle='#f7f3ea';c.fillRect(-w/2,-h/2,w,h);c.shadowColor='transparent';
@@ -211,7 +211,7 @@ function polaroid(c,x,y,w,ch,t,label){const f=FAM[ch]||FAM[1];const im=IMG('img/
 // ---------- Grand level-complete screen ----------
 const coinSvg='<svg class="coin" viewBox="0 0 24 24"><use href="#i-coin"/></svg>';
 function showResult(g){try{clearTimeout(tipH);if(G)G.tips=[];}catch(e){}try{const tp=document.getElementById("tip");if(tp){tp.classList.remove("on","show");tp.style.display="none";setTimeout(()=>{tp.style.display=""},50);}}catch(e){}const r=g.rew||calcRew(g,true);const ch=g.ch;const el=ovEl('res');el.className='ov3 res';el.style.display='block';$('pop').style.display='none';
- const li0=lvlInfo(r.xp0??S3.xp-r.xp),last=g.i>=LEVELS.length-1;const types=[...new Set(g.st.veh.map(v=>v.type).filter(t=>'EKTA'.includes(t)))];if(!types.length)types.push('E');
+ const li0=lvlInfo(r.xp0??S3.xp-r.xp),last=isLastLv(g.i);const types=[...new Set(g.st.veh.map(v=>v.type).filter(t=>'EKTA'.includes(t)))];if(!types.length)types.push('E');
  const done=!!S3.dbl[g.i]||(g.help||0)>=2;// rewarded cap: max 2 rewarded ads per level (hint/undo/heart/x2 combined)
  el.innerHTML=`<canvas id="rcv"></canvas><div class="rtop"><div class="rt">${T('win')}</div><div class="rs">${T('winSub')}</div></div>
  <div class="rpanel"><div class="rrow"><canvas id="rbadge" width="96" height="96"></canvas><div class="rk"><b id="rRank">${T('rk'+(rankOf(li0.L)+1))}</b><span id="rLv">${T('lvl')} ${li0.L}</span></div><div class="rcoins">${coinSvg}<b id="rCoin">${r.c0??S3.coins-r.coins}</b></div></div>
@@ -293,9 +293,9 @@ const BEATS=[
 BEATS.forEach((b,i)=>{SEQS['s'+(i+1)]=[{im:b[0],kb:b[1],grade:b[2],fx:b[3],flip:!!b[4],cap:['s'+String(i+1).padStart(2,'0')],d:4.4,beat:i+1}];});
 // epilogue shot before credits
 if(!SEQS.ending.some(s=>s.ep)){const ci=SEQS.ending.findIndex(s=>s.credits);SEQS.ending.splice(ci,0,{im:'e1',cap:['ep1'],d:5.4,kb:[.5,.55,1.05,.5,.45,1.25],fx:'confetti',grade:'gold',ep:1});}
-function afterLevel(g){const i=g.i;const next=()=>{if(i>=LEVELS.length-1){playEnding();return;}Ads.maybeInterstitial(i+1);startLevel(i+1);};
+function afterLevel(g){const i=g.i;const next=()=>{if(isLastLv(i)){playEnding();return;}Ads.maybeInterstitial(i+1);startLevel(i+1);};
  const beat=()=>{if(!S3.beats[i]||window.__ft.alwaysBeat){S3.beats[i]=1;persist();playSeq('s'+(i+1),next);}else next();};
- if(g.L.boss&&i<LEVELS.length-1&&SEQS['b'+g.ch]&&!S3.boss[g.ch]){S3.boss[g.ch]=1;persist();playSeq('b'+g.ch,beat);}else beat();}
+ if(g.L.boss&&!isLastLv(i)&&SEQS['b'+g.ch]&&!S3.boss[g.ch]){S3.boss[g.ch]=1;persist();playSeq('b'+g.ch,beat);}else beat();}
 const GRADE={night:[['multiply','rgba(110,130,190,.5)']],dawn:[['screen','rgba(255,170,90,.22)']],warm:[['screen','rgba(255,130,50,.14)'],['multiply','rgba(255,220,190,.9)']],cool:[['multiply','rgba(150,175,215,.7)']],
  storm:[['multiply','rgba(150,165,205,.55)']],fog:[['screen','rgba(200,210,225,.2)']],gold:[['screen','rgba(255,205,120,.2)']],dusk:[['multiply','rgba(200,140,170,.7)'],['screen','rgba(255,120,60,.1)']]};
 function drawShot3(s,lt,alpha){if(!s||s.credits)return;const im=IMG('img/'+s.im+'.jpg');if(!ok(im))return;const u=E.io(clamp(lt/s.d,0,1));const k=s.kb;

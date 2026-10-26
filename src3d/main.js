@@ -47,7 +47,7 @@ function init(){
   const out=mergeGroup(g);if(lad){lad.position.set(0,0,0);lad.rotation.set(0,0,0);const lm=mergeGroup(lad);lm.position.copy(ladT.p);lm.rotation.copy(ladT.r);lm.userData.ladder=1;out.add(lm);out.userData.lad=lm;}
   const bb=new THREE.Box3().setFromObject(out);out.userData={...out.userData,lb,bb,L:bb.max.x-bb.min.x,Wd:bb.max.z-bb.min.z,cx:(bb.max.x+bb.min.x)/2,cz:(bb.max.z+bb.min.z)/2};MD.tier(0);return out;}
  function model(type,tier){const veh='EKTA'.includes(type);const skin=veh?skinOf(type):0;const key=type+(veh?tier:'')+'|'+skin;let m=MC.get(key);if(m)return m;
-  let make;if(MD.B[type])make=MD.B[type];else if(type.startsWith('car'))make=()=>MD.sedan(+type.slice(3));else make={cone:MD.cone,bar:MD.barrier,hyd:MD.hydrant}[type];
+  let make;if(MD.B[type])make=MD.B[type];else if(type.startsWith('car'))make=()=>MD.sedan(+type.slice(3));else make={cone:MD.cone,bar:MD.barrier,hyd:MD.hydrant,deb:MD.debris}[type];
   m=buildModel(key,make,veh?tier:0,skin);MC.set(key,m);return m;}
  function sedanHex(h){const key='sed'+h;let m=MC.get(key);if(!m){m=buildModel(key,()=>MD.sedan(h),0,0);MC.set(key,m);}return m;}
  function instance(m,fit){const root=new THREE.Group();const yaw=new THREE.Group();const body=m.clone();root.add(yaw);yaw.add(body);const u=m.userData;
@@ -151,7 +151,7 @@ function init(){
   // civilian cars (tow-able), cones, barriers
   G.st.blk.forEach(b=>{const k=b.x+','+b.y;const j=G.blkJ[k]||0;if(b.sub==='#'){const car=G.cars[k];if(!car||car.done)return;const hex=parseInt((car.col&&car.col[1]||'#4a8fd6').slice(1),16);
     const o=getObj('c'+k+'_'+hex,()=>instance(sedanHex(hex),FIT));const [x,z]=W2(car.px,car.py);o.position.set(x+Math.sin(j*40)*.05*j,0,z);o.rotation.y=-car.ang;if(car.attached||j>0)moving=true;}
-   else if(!b.gone){const o=propObj('b'+k,b.sub==='x'?'bar':'cone',b.sub==='x'?[.8,.8]:[.62,.62]);const [x,z]=W2(b.x,b.y);o.position.set(x+Math.sin(j*40)*.06*j,0,z);if(b.sub==='x')o.rotation.y=Math.PI/2*((b.x+b.y)%2);if(j>0)moving=true;}});
+   else if(!b.gone){const o=propObj('b'+k,b.sub==='x'?'bar':b.sub==='d'?'deb':'cone',b.sub==='x'?[.8,.8]:b.sub==='d'?[.84,.84]:[.62,.62]);const [x,z]=W2(b.x,b.y);o.position.set(x+Math.sin(j*40)*.06*j,0,z);if(b.sub==='x')o.rotation.y=Math.PI/2*((b.x+b.y)%2);if(j>0)moving=true;}});
   G.st.hyd.forEach((h,i)=>{if(G.hydVis[i].gone)return;const o=propObj('h'+i,'hyd',[.55,.55]);const [x,z]=W2(h.x,h.y);o.position.set(x,0,z);});
   G.st.sw.forEach((s,i)=>{const o=switchObj('s'+i);const [x,z]=W2(s.x,s.y);o.position.set(x,0,z);const on=G.gateA>0;o.userData.btn.position.y=on?.06:.09;o.userData.gl.material.opacity=on?.2:.35+.25*Math.sin(t*5);});
   G.st.gates.forEach((g,i)=>{const o=gateObj('g'+i);const [x,z]=W2(g.x,g.y);o.position.set(x,0,z);o.userData.arm.rotation.z=G.gateA*1.35;if(G.gateA>0&&G.gateA<1)moving=true;});
@@ -323,6 +323,7 @@ function init(){
   else {u.L.p.rotation.x=-1.45;u.R.p.rotation.x=-1.35;u.L.kn.rotation.x=1.2;u.R.kn.rotation.x=.9;u.A.p.rotation.set(-2.5,0,.35);u.A.el.rotation.x=-1.4;u.B.p.rotation.set(-.5+Math.sin(t*3+ph)*.25,0,-.2);u.head.rotation.z=Math.sin(t*1.2+ph)*.12;}}
  function setupScene(ch){const d=CH[ch]||CH[1];const s=new THREE.Scene();S3D.scene=s;S3D.ch=ch;S3D.G=G;s.background=skyTex(d.sky[0],d.sky[1]);s.environment=ENV;s.environmentIntensity=.35;s.fog=new THREE.Fog(d.fog,30,75);
   s.add(new THREE.HemisphereLight(d.amb,0x202020,d.ambI));const k=new THREE.DirectionalLight(d.key,d.keyI);k.position.set(...d.keyP).multiplyScalar(3);k.castShadow=true;k.shadow.mapSize.set(1024,1024);Object.assign(k.shadow.camera,{left:-22,right:22,top:30,bottom:-6,near:1,far:120});k.shadow.bias=-.0008;s.add(k);S3D.key=k;
+  if(G&&G.L&&G.L.endless){const zt=G.L.zt|0;const TN=[[0x8fa8ff,.9],[0xffb070,1.1],[0xa0b8d0,.85],[0xff8fb0,1]][zt];k.color.lerp(new THREE.Color(TN[0]),.45);k.intensity*=TN[1];s.fog.color.lerp(new THREE.Color(TN[0]),.25);}
   const fl=new THREE.PointLight(0xff7a2a,0,40,1.4);s.add(fl);S3D.fireL=fl;
   // street: wet asphalt + sidewalk + kerb
   const st=new THREE.Mesh(new THREE.PlaneGeometry(140,40),new THREE.MeshStandardMaterial({color:0x22252b,roughness:.28,metalness:.4,envMapIntensity:.6}));st.rotation.x=-Math.PI/2;st.position.z=12;st.receiveShadow=true;s.add(st);

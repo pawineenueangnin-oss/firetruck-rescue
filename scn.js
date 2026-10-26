@@ -3,7 +3,7 @@
 (function(){
 const TAU=Math.PI*2;
 const SCN=window.SCN=['fire','crash','cat','fire','fire','fire','hurt','fire','cat','fire','fire','fire','crash','hurt','fire','fire','fire','fire','fire','cat','crash','fire','fire','fire','crash','hurt','fire','cat','fire','fire'];
-const scnOf=i=>SCN[i]||'fire';window.scnOf=scnOf;
+const scnOf=i=>SCN[i]||(typeof LEVELS!=='undefined'&&LEVELS[i]&&LEVELS[i].scn)||'fire';window.scnOf=scnOf;
 const BAR={fire:['i-flame','fire'],crash:['i-warn','barDanger'],hurt:['i-clock','barTime'],cat:['i-clock','barTime']};
 const OBJ={fire:'objFire',crash:'objCrash',hurt:'objHurt',cat:'objCat'};
 function setHud(){if(!G)return;const k=G.scn||'fire';const fh=$('fireHud');if(fh){const u=fh.querySelector('use');if(u)u.setAttribute('href','#'+BAR[k][0]);const sp=fh.querySelector('span[data-t]');if(sp){sp.dataset.t=BAR[k][1];sp.textContent=T(BAR[k][1]);}fh.dataset.scn=k;}

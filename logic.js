@@ -1,13 +1,13 @@
 // Firetruck Rescue — shared board logic (browser + node). Original code by P-Prece Studio.
 // Cell tokens (2 chars): ".." road, "E?"/"K?"/"T?"/"A?"/"V?"/"P?"/"C?"/"W?" vehicle + dir (U/D/L/R),
-// "##" parked car, "xx" barrier, "oo" cone, "h." hydrant, "t?" turn arrow, "gg" gate, "s." gate switch.
+// "##" parked car, "xx" barrier, "oo" cone, "h." hydrant, "dd" fallen debris (static), "t?" turn arrow, "gg" gate, "s." gate switch.
 (function(root){
 const DIRS={U:[0,-1],D:[0,1],L:[-1,0],R:[1,0]},OPP={U:'D',D:'U',L:'R',R:'L'};
 const VT='EKTAVPCW';
 function parse(L){const st={w:L.w,h:L.h,occ:{},veh:[],blk:[],turn:{},hyd:[],sw:[],gates:[],gatesOpen:false};
  L.grid.forEach((row,y)=>{for(let x=0;x<L.w;x++){const t=row.substr(x*2,2),k=x+','+y,a=t[0],b=t[1];
   if(VT.includes(a)&&'UDLR'.includes(b)){const v={id:st.veh.length,x,y,d:b,type:a,gone:false,kind:'veh'};st.veh.push(v);st.occ[k]=v;}
-  else if(t==='##'||t==='xx'||t==='oo'){const o={x,y,kind:'blk',sub:t[0],gone:false};st.blk.push(o);st.occ[k]=o;}
+  else if(t==='##'||t==='xx'||t==='oo'||t==='dd'){const o={x,y,kind:'blk',sub:t[0],gone:false};st.blk.push(o);st.occ[k]=o;}
   else if(t==='gg'){const g={x,y,kind:'gate'};st.gates.push(g);st.occ[k]=g;}
   else if(a==='t')st.turn[k]=b;else if(t==='h.')st.hyd.push({x,y,got:false});else if(t==='s.')st.sw.push({x,y});}});
  return st;}

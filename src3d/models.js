@@ -154,5 +154,14 @@ function barrier(){const g=new THREE.Group();[-1,1].forEach(s=>{box(g,.04,.22,.0
  const tx=new THREE.CanvasTexture(tc);tx.colorSpace=THREE.SRGBColorSpace;box(g,.04,.08,.76,new THREE.MeshStandardMaterial({map:tx,roughness:.4}),0,.2,0,0);box(g,.012,.012,.012,mat.lr,0,.27,-.32,0);box(g,.012,.012,.012,mat.lr,0,.27,.32,0);return g;}
 function hydrant(){const g=new THREE.Group();const m=P(0xd81818,{roughness:.35});cyl(g,.065,.2,m,0,.12,0,'y');cyl(g,.08,.03,m,0,.02,0,'y');
  const top=new THREE.Mesh(new THREE.SphereGeometry(.068,24,12,0,Math.PI*2,0,Math.PI/2),m);top.position.y=.22;g.add(top);cyl(g,.02,.03,mat.chrome,0,.29,0,'y');cyl(g,.03,.2,mat.chrome,0,.15,0,'x');cyl(g,.035,.05,mat.chrome,0,.15,.07,'z');return g;}
-export {B,sedan,cone,barrier,hydrant,civC,M,box,cyl,BASE};
+// fallen debris: broken concrete slabs + charred beams + hazard tape (original, built in code)
+function debris(){const g=new THREE.Group();const con=M(0x8a8780,{roughness:.95}),con2=M(0x6c6a66,{roughness:.95}),wood=M(0x2e1d12,{roughness:.9}),ember=M(0x3a1004,{emissive:0xff5a10,emissiveIntensity:.9,roughness:.8});
+ const sl=(w,h,d,m,x,y,z,rx,ry,rz)=>{const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);b.position.set(x,y,z);b.rotation.set(rx,ry,rz);b.castShadow=true;b.receiveShadow=true;g.add(b);return b;};
+ sl(.42,.07,.3,con,-.06,.04,.02,0,.3,.05);sl(.3,.06,.24,con2,.12,.1,-.06,.25,-.4,-.2);sl(.22,.05,.18,con,-.14,.12,-.1,-.3,.9,.25);
+ sl(.6,.06,.06,wood,0,.15,.06,0,.7,.32);sl(.5,.05,.05,wood,.04,.09,-.14,.1,-.5,-.18);sl(.12,.045,.045,ember,.2,.06,.12,0,.2,0);
+ for(let i=0;i<5;i++){const r=new THREE.Mesh(new THREE.DodecahedronGeometry(.03+Math.random()*.03,0),i%2?con:con2);r.position.set((Math.random()-.5)*.6,.03,(Math.random()-.5)*.5);g.add(r);}
+ const tc=document.createElement('canvas');tc.width=128;tc.height=16;const t=tc.getContext('2d');for(let i=0;i<8;i++){t.fillStyle=i%2?'#111':'#ffd21a';t.beginPath();t.moveTo(i*16,0);t.lineTo(i*16+16,0);t.lineTo(i*16+8,16);t.lineTo(i*16-8,16);t.fill();}
+ const tx=new THREE.CanvasTexture(tc);tx.colorSpace=THREE.SRGBColorSpace;const tape=new THREE.Mesh(new THREE.PlaneGeometry(.8,.05),new THREE.MeshStandardMaterial({map:tx,side:THREE.DoubleSide,roughness:.5}));tape.position.set(0,.2,.24);g.add(tape);
+ [-.38,.38].forEach(x=>{const p=new THREE.Mesh(new THREE.CylinderGeometry(.012,.012,.24,8),mat.grey);p.position.set(x,.12,.24);g.add(p);});return g;}
+export {B,sedan,cone,barrier,hydrant,debris,civC,M,box,cyl,BASE};
 export function tier(t){TIER(t);}

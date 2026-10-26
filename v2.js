@@ -138,7 +138,7 @@ window.renderBoard=function(){const cs=G.cs,t=G.t;cx.drawImage(BOARD.c,BOARD.ox,
  const items=[];G.st.hyd.forEach((h,i)=>{if(!G.hydVis[i].gone)items.push({y:h.y,f:()=>drawHydrant(cx,...cellXY(h.x,h.y),cs,t)});});
  G.st.gates.forEach(g=>items.push({y:g.y,f:()=>drawGate(cx,...cellXY(g.x,g.y),cs,G.gateA,t)}));
  G.st.blk.forEach(b=>{if(b.sub==='#'){const car=G.cars[b.x+','+b.y];if(car&&!car.done)items.push({y:car.py,f:()=>drawCivCar(cx,...cellXY(car.px,car.py),cs,car.ang,car.col,{j:G.blkJ[b.x+','+b.y]||0})});}
-  else if(!b.gone){const j=G.blkJ[b.x+','+b.y]||0;items.push({y:b.y,f:()=>(b.sub==='x'?drawBarrier:drawCone)(cx,...cellXY(b.x,b.y),cs,j)});}});
+  else if(!b.gone){const j=G.blkJ[b.x+','+b.y]||0;items.push({y:b.y,f:()=>(b.sub==='x'?drawBarrier:b.sub==='d'?drawDebris:drawCone)(cx,...cellXY(b.x,b.y),cs,j)});}});
  const arrows=[];
  Object.values(G.vv).forEach(vv=>{if(vv.done||vv.scale<=0)return;const [x,y]=cellXY(vv.px,vv.py);const hint=G.hint&&G.hint.id===vv.v.id;
   if(!vv.segs.length&&vv.scale>=1)arrows.push([x,y,vv.v.d,hint]);
@@ -305,12 +305,12 @@ window.storyUpd=function(){};
 window.chapterCard=function(ch,cb){playSeq('c'+ch,cb);};
 function showCredits(){$('cap').classList.remove('on');$('bSkip').style.display='none';const c=$('credits');c.style.display='flex';
  c.innerHTML=`<div class="crroll"><div class="te">${T('theEnd')}</div><img src="studio-logo.png" alt=""><div class="sn">P-Prece Studio</div><div class="snt">พีพีช Studio</div><div class="mb">${T('credits')} P-Prece Studio</div><div class="ty">${T('thanks')}</div>
- <div class="row"><button class="btn blue" id="crRe">${T('replay')}</button><button class="btn gold" id="crMap">${T('map')}</button></div></div>`;
- confetti();AU.win();$('crRe').onclick=()=>{AU.click();playEnding();};$('crMap').onclick=()=>{AU.click();SQ.seq=null;c.style.display='none';showMap();};}
+ <div class="row"><button class="btn blue" id="crRe">${T('replay')}</button><button class="btn gold" id="crMap">${T('map')}</button></div><button class="btn green" id="crEnd">${T('endlessGo')}</button></div>`;
+ confetti();AU.win();$('crRe').onclick=()=>{AU.click();playEnding();};$('crMap').onclick=()=>{AU.click();SQ.seq=null;c.style.display='none';showMap();};$('crEnd').onclick=()=>{AU.click();SQ.seq=null;c.style.display='none';startLevel(30);};}
 window.playEnding=function(){SAVE.seen.ending=1;persist();playSeq('ending',()=>showMap());};
 // boss cutscenes + ending hook on win popup
 const _endPopup=window.endPopup;
-window.endPopup=function(winb){if(winb&&G&&G.L.boss){const g=G,ch=g.ch;if(g.i>=LEVELS.length-1){playEnding();return;}
+window.endPopup=function(winb){if(winb&&G&&G.L.boss){const g=G,ch=g.ch;if(isLastLv(g.i)){playEnding();return;}
   if(SEQS['b'+ch]){playSeq('b'+ch,()=>{G=g;setMode('game');_endPopup(true);});return;}}
  _endPopup(winb);};
 // keep tutorial bubble placed

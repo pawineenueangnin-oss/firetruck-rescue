@@ -148,6 +148,11 @@ const CIV=[['#9fd0ff','#4a8fd6','#24548f'],['#b8f0a0','#5fbf4a','#2e7a22'],['#e0
 function drawCone(c,x,y,s,j){c.save();c.translate(x+Math.sin((j||0)*40)*3*(j||0),y);c.fillStyle='rgba(0,0,0,.3)';ell(c,s*.04,s*.2,s*.22,s*.08);c.fill();c.fillStyle='#3a3d44';rr(c,-s*.2,s*.08,s*.4,s*.12,s*.03);c.fill();
  c.fillStyle=lg(c,-s*.15,0,s*.15,0,['#ffb066','#ff6a00','#c24a00']);c.beginPath();c.moveTo(-s*.15,s*.12);c.lineTo(-s*.035,-s*.3);c.lineTo(s*.035,-s*.3);c.lineTo(s*.15,s*.12);c.closePath();c.fill();
  c.fillStyle='#fff';c.beginPath();c.moveTo(-s*.1,-.02*s);c.lineTo(-s*.075,-s*.12);c.lineTo(s*.075,-s*.12);c.lineTo(s*.1,-s*.02);c.closePath();c.fill();c.restore();}
+function drawDebris(c,x,y,s,j){c.save();c.translate(x+Math.sin((j||0)*40)*3*(j||0),y);c.fillStyle='rgba(0,0,0,.3)';c.beginPath();c.ellipse(0,s*.16,s*.42,s*.1,0,0,7);c.fill();
+ const slab=(px,py,w,h,a,col)=>{c.save();c.translate(px*s,py*s);c.rotate(a);c.fillStyle=col;rr(c,-w*s/2,-h*s/2,w*s,h*s,s*.03);c.fill();c.fillStyle='rgba(255,255,255,.18)';c.fillRect(-w*s/2,-h*s/2,w*s,h*s*.25);c.restore();};
+ slab(-.08,.06,.56,.16,.08,'#8a8780');slab(.12,-.04,.4,.14,-.35,'#6c6a66');slab(-.16,-.08,.3,.12,.6,'#9a968e');
+ slab(0,-.12,.74,.07,.42,'#3a2414');slab(.04,.02,.6,.06,-.3,'#2e1d12');c.fillStyle='#ff6a1a';c.globalAlpha=.75;c.beginPath();c.arc(s*.22,s*.05,s*.035,0,7);c.fill();c.globalAlpha=1;
+ c.save();c.beginPath();c.rect(-s*.44,s*.17,s*.88,s*.06);c.clip();for(let k=-6;k<7;k++){c.fillStyle=k%2?'#111':'#ffd21a';c.fillRect(k*s*.08,s*.17,s*.08,s*.06);}c.restore();c.restore();}
 function drawBarrier(c,x,y,s,j){c.save();c.translate(x+Math.sin((j||0)*40)*3*(j||0),y);c.fillStyle='rgba(0,0,0,.3)';rr(c,-s*.38,s*.1,s*.8,s*.12,s*.05);c.fill();
  c.fillStyle='#555b66';c.fillRect(-s*.32,-s*.05,s*.06,s*.24);c.fillRect(s*.26,-s*.05,s*.06,s*.24);
  c.save();rr(c,-s*.42,-s*.2,s*.84,s*.2,s*.05);c.clip();c.fillStyle='#fff';c.fillRect(-s*.42,-s*.2,s*.84,s*.2);c.fillStyle='#e8322a';for(let k=-5;k<6;k++){c.beginPath();c.moveTo(k*s*.16,-s*.2);c.lineTo(k*s*.16+s*.08,-s*.2);c.lineTo(k*s*.16-s*.02,0);c.lineTo(k*s*.16-s*.1,0);c.fill();}c.restore();
@@ -269,8 +274,8 @@ function buildBoard(){const cs=G.cs,pad=cs*1.3;const w=G.bw+pad*2,h=G.bh+pad*2;c
 function cellXY(x,y){return[G.bx+(x+.5)*G.cs,G.by+(y+.5)*G.cs];}
 // ---------- Level ----------
 const WATER={E:1,T:2,K:1};
-function startLevel(i,skipCard){AU.init();const L=LEVELS[i];const ch=L.ch;$('pop').style.display='none';
- if(!skipCard&&(i%6===0)&&!SAVE.seen['ch'+ch]){SAVE.seen['ch'+ch]=1;persist();chapterCard(ch,()=>startLevel(i,true));return;}
+function startLevel(i,skipCard){AU.init();if(window.FTX)FTX.ensure(i);const L=LEVELS[i];const ch=L.ch;$('pop').style.display='none';
+ if(!skipCard&&i<30&&(i%6===0)&&!SAVE.seen['ch'+ch]){SAVE.seen['ch'+ch]=1;persist();chapterCard(ch,()=>startLevel(i,true));return;}
  const st=FL.parse(L);const fireMax=Math.max(1,st.veh.reduce((a,v)=>a+(WATER[v.type]||0),0));
  const people=clamp(st.veh.filter(v=>v.type==='A'||v.type==='K').length,1,ch===4?4:ch===2?5:6);
  G={i,L,ch,st,hearts:3,help:0,hist:[],state:'play',t:0,hint:null,pending:0,vv:{},firstTap:false,tips:[],fireMax,fire:fireMax,people,rescued:0,sv:[],gateA:0,cars:{},blkJ:{},imp:[],endT:0,steam:0,winT:0,flames:[]};
@@ -335,7 +340,7 @@ function onExit(vv){vv.done=true;vv.siren=false;G.pending--;if(G.st.gatesOpen&&G
 function onBump(vv,s){const cs=G.cs;AU.crash();CAM.sh=.4;vv.wob=.25;vv.sq=.15;const [x,y]=cellXY(vv.px+s.dx*.45,vv.py+s.dy*.45);sparkle(x,y,12,['#fff','#ffd23f','#ff8a1e']);puff(x,y,8,'rgba(180,180,190,.7)',cs*.08,60);
  G.imp.push({x,y,t:0},{x:cellXY(vv.v.x,vv.v.y)[0],y:cellXY(vv.v.x,vv.v.y)[1]-cs*.6,t:0,ex:true});
  const b=s.blk;if(b){if(b.kind==='veh'){const w=G.vv[b.id];w.wob=.3;w.sq=.1;}else G.blkJ[b.x+','+b.y]=1;}
- G.fire=Math.min(G.fireMax*1.5,G.fire+1);G.flare=1;markHeart('lose');updHUD();bumpEl('fireHud');if(navigator.vibrate)try{navigator.vibrate(40);}catch(e){}}
+ G.fire=Math.min(G.fireMax*1.5,G.fire+(G.L.endless?Math.min(1.6,1.1+(G.L.zone||0)*.06):1));G.flare=1;markHeart('lose');updHUD();bumpEl('fireHud');if(navigator.vibrate)try{navigator.vibrate(40);}catch(e){}}
 function updScene(dt){const S=G.S;G.steam=Math.max(0,G.steam-dt*.4);G.flare=Math.max(0,(G.flare||0)-dt);
  G.sv.forEach(v=>{v.t+=dt;if(v.state==='drive'){const d=v.tx-v.x;v.x+=Math.sign(d)*Math.min(Math.abs(d),dt*S.w*.9);if(Math.abs(d)<2){v.state='work';v.work=0;onArrive(v);}}
   else{v.work+=dt;if(WATER[v.type]&&v.work<2.6&&G.flames.length){if(Math.random()<.7){const f=G.flames[Math.floor(Math.random()*G.flames.length)];drops(v.x,S.y+S.h*.78,f[0],f[1],2);}
@@ -374,7 +379,7 @@ function renderBoard(){const cs=G.cs,t=G.t;cx.drawImage(BOARD.c,BOARD.ox,BOARD.o
  G.st.sw.forEach(s=>drawSwitch(cx,...cellXY(s.x,s.y),cs,G.gateA>0,t));
  G.st.gates.forEach(g=>drawGate(cx,...cellXY(g.x,g.y),cs,G.gateA,t));
  const items=[];G.st.blk.forEach(b=>{if(b.sub==='#'){const car=G.cars[b.x+','+b.y];if(car&&!car.done)items.push({y:car.py,f:()=>drawCivCar(cx,...cellXY(car.px,car.py),cs,car.ang,car.col,{j:G.blkJ[b.x+','+b.y]||0})});}
-  else if(!b.gone){const j=G.blkJ[b.x+','+b.y]||0;items.push({y:b.y,f:()=>(b.sub==='x'?drawBarrier:drawCone)(cx,...cellXY(b.x,b.y),cs,j)});}});
+  else if(!b.gone){const j=G.blkJ[b.x+','+b.y]||0;items.push({y:b.y,f:()=>(b.sub==='x'?drawBarrier:b.sub==='d'?drawDebris:drawCone)(cx,...cellXY(b.x,b.y),cs,j)});}});
  Object.values(G.vv).forEach(vv=>{if(vv.done||vv.scale<=0)return;items.push({y:vv.py,f:()=>{const [x,y]=cellXY(vv.px,vv.py);const hint=G.hint&&G.hint.id===vv.v.id;drawVeh(cx,x,y,cs*vv.scale,vv.v.type,vv.ang,{t,siren:vv.siren,lights:vv.siren,sq:vv.sq,wob:vv.wob,hint:hint?G.hint.t:0});
    if(!vv.segs.length&&vv.scale>=1&&!hint){const [dx,dy]=FL.DIRS[vv.v.d];cx.fillStyle='rgba(255,255,255,.55)';cx.save();cx.translate(x+dx*cs*.5,y+dy*cs*.5);cx.rotate(ANG[vv.v.d]);cx.beginPath();cx.moveTo(cs*.07,0);cx.lineTo(-cs*.05,-cs*.07);cx.lineTo(-cs*.05,cs*.07);cx.fill();cx.restore();}}});});
  cx.save();cx.beginPath();cx.rect(G.bx-cs*1.2,G.by-cs*1.2,G.bw+cs*2.4,G.bh+cs*2.4);cx.clip();items.sort((a,b)=>a.y-b.y).forEach(i=>i.f());cx.restore();
@@ -407,7 +412,7 @@ function win(){G.state='win';const stars=G.hearts;const i=G.i;SAVE.stars[i]=Math
 function endPopup(winb){const p=$('pop');p.style.display='flex';const g=G;let h='<div class="card">';
  if(winb){h+=`<h2>${T('win')}</h2><div class="sub">${T('winSub')}</div><div class="stars">${[0,1,2].map(k=>`<svg viewBox="0 0 24 24" class="${k<g.hearts?'on':''}" style="animation-delay:${.15+k*.22}s"><use href="#i-star"/></svg>`).join('')}</div>`;
   h+=`<canvas id="ecv" width="440" height="220"></canvas><div class="cline"><svg viewBox="0 0 24 24"><use href="#i-person"/></svg>${T('saved')} ${g.people}/${g.people}</div>`;
-  const last=g.i>=LEVELS.length-1;if(last)h+=`<div style="font-weight:800;margin:4px 0">${T('allDone')}</div>`;
+  const last=window.isLastLv?isLastLv(g.i):g.i>=LEVELS.length-1;if(last)h+=`<div style="font-weight:800;margin:4px 0">${T('allDone')}</div>`;
   h+=(last?'':`<button class="btn green" id="pNext">${T('next')}</button>`)+`<div class="row"><button class="btn blue" id="pRetry">${T('retry')}</button><button class="btn gold" id="pMap">${T('map')}</button></div>`;}
  else{h+=`<h2 class="lose">${T('lose')}</h2><div class="sub">${T('loseSub')}</div><canvas id="ecv" width="440" height="220"></canvas>`;
   if(g.help<2)h+=`<button class="btn pink" id="pHeart"><svg class="ad" viewBox="0 0 24 24"><use href="#i-play"/></svg><span>${T('heart')}<small>${T('video')}</small></span></button>`;
@@ -429,11 +434,12 @@ function chapterCard(ch,cb){setMode('card');const p=$('pop');p.style.display='fl
  $('cGo').onclick=()=>{AU.click();p.style.display='none';cb();};}
 function showTitle(){G=null;const t=$('title');t.innerHTML=`<button class="rb green corner" id="tSet" aria-label="settings"><svg><use href="#i-gear"/></svg></button><div class="logo"><span class="l1" data-x="Firetruck">Firetruck</span><span class="l2" data-x="Rescue">Rescue</span></div><div class="tag">${T('tag')}</div><button class="btn green big" id="tPlay">${T('play')}</button><button class="btn blue" id="tStory">${T('story')}</button>`;
  $('tPlay').onclick=()=>{AU.init();AU.click();if(!SAVE.seen.story)startStory();else showMap();};$('tStory').onclick=()=>{AU.init();AU.click();startStory();};$('tSet').onclick=()=>{AU.init();settings();};setMode('title');}
-function showMap(){G=null;parts.length=0;const m=$('map');const unlocked=SAVE.stars.filter(x=>x>0).length;const cur=Math.min(unlocked,LEVELS.length-1);const tot=SAVE.stars.reduce((a,b)=>a+(b||0),0);
- let h=`<div class="mhead"><button class="rb green" id="mBack" aria-label="title"><svg><use href="#i-home"/></svg></button><div class="pill">${T('map')}</div><div class="pill tot"><svg viewBox="0 0 24 24"><use href="#i-star"/></svg>${tot}/${LEVELS.length*3}</div><button class="rb green" id="mSet" aria-label="settings"><svg><use href="#i-gear"/></svg></button></div><div class="path" id="mpath">`;
- for(let i=LEVELS.length-1;i>=0;i--){const lk=i>cur&&!(SAVE.stars[i]>0);const off=Math.sin(i*1.25)*28;const s=SAVE.stars[i]||0;const boss=LEVELS[i].boss;
+function showMap(){G=null;parts.length=0;const m=$('map');const unlocked=SAVE.stars.filter(x=>x>0).length;const N=window.FTX&&unlocked>=30?Math.max(30,unlocked+4):30;const cur=Math.min(unlocked,N-1);const tot=SAVE.stars.reduce((a,b)=>a+(b||0),0);
+ let h=`<div class="mhead"><button class="rb green" id="mBack" aria-label="title"><svg><use href="#i-home"/></svg></button><div class="pill">${T('map')}</div><div class="pill tot"><svg viewBox="0 0 24 24"><use href="#i-star"/></svg>${tot}/${N*3}</div><button class="rb green" id="mSet" aria-label="settings"><svg><use href="#i-gear"/></svg></button></div><div class="path" id="mpath">`;
+ for(let i=N-1;i>=0;i--){const lk=i>cur&&!(SAVE.stars[i]>0);const off=Math.sin(i*1.25)*28;const s=SAVE.stars[i]||0;const boss=i>=30?FTX.isBoss(i):LEVELS[i].boss;
   h+=`<div class="wrapn" style="margin-left:calc(50% - 55px + ${off}%)">${boss?`<div class="nl"><svg viewBox="0 0 24 24"><use href="#i-flame"/></svg></div>`:''}<button class="node ${lk?'lock':''} ${i===cur?'cur':''} ${boss?'boss':''}" data-i="${i}">${lk?'<svg viewBox="0 0 24 24"><use href="#i-lock"/></svg>':i+1}</button><div class="ns">${lk?'':[0,1,2].map(k=>`<svg viewBox="0 0 24 24" class="${k<s?'on':''}"><use href="#i-star"/></svg>`).join('')}</div></div>`;
-  if(i%6===0){const ch=i/6+1;h+=`<div class="chhead"><canvas class="chcv" data-ch="${ch}" width="300" height="120"></canvas><div class="chn">${T('chapter')} ${ch} · ${T('c'+ch)}</div></div>`;}}
+  if(i>=30&&(i-30)%10===0){const z=(i-30)/10,zc=[2,3,1,4,5][z%5];h+=`<div class="chhead"><canvas class="chcv" data-ch="${zc}" width="300" height="120"></canvas><div class="chn">${T('endless')} · ${T('zone')} ${z+1}</div></div>`;}
+  else if(i<30&&i%6===0){const ch=i/6+1;h+=`<div class="chhead"><canvas class="chcv" data-ch="${ch}" width="300" height="120"></canvas><div class="chn">${T('chapter')} ${ch} · ${T('c'+ch)}</div></div>`;}}
  m.innerHTML=h+'</div>';setMode('map');
  m.querySelectorAll('.chcv').forEach(c=>{const g=c.getContext('2d');g.setTransform(2,0,0,2,0,0);drawScene(g,+c.dataset.ch,0,0,150,60,1.3,.6,{waiting:2});});
  m.querySelectorAll('.node').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;if(b.classList.contains('lock')){AU.tone(200,.1,'triangle',.2);b.animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}],{duration:300});return;}AU.click();startLevel(i);});
