@@ -24,7 +24,7 @@ window.layout=function(){if(!G)return;const L=G.L;const s=SAFE();const land=LAND
  const top=S.y+S.h+(land?6:22);const bot=(land?8+s.b+BANNER():Math.max(60+BANNER()+s.b,H-toolsTop()+12));
  const availW=PW-(land?8:10),availH=H-top-bot;
  G.cs=Math.floor(Math.min(availW/L.w,availH/L.h,150));G.bw=G.cs*L.w;G.bh=G.cs*L.h;G.bx=Math.round(sideL+(PW-G.bw)/2);G.by=Math.round(top+(availH-G.bh)/2);G.view={ox:sideL,oy:top-4,w:PW,h:Math.max(80,availH+8)};
- if(window.R3boardRatio&&window.R3&&R3.ok&&!R3.off&&!R3.lost){const Z=land?1:1.07;// slight zoom: crops only the outer kerb, never the cells
+ if(window.R3boardRatio&&window.R3&&R3.ok&&!R3.off&&!R3.lost){const Z=land?1:1.05;// slight zoom: crops only the outer kerb, never the cells
   const vw=PW*Z,vx=sideL-(vw-PW)/2;const btm=H-bot,mx=btm-(S.y+(land?40:64));const need=vw*R3boardRatio(L)+Math.min(34,H*.04);
   let vh=Math.max(110,Math.min(mx,need));const spare=mx-vh;// leftover height: give scene up to 24% of screen, rest stays as street props under the board
   const vt=btm-vh;S.h=Math.max(land?30:56,Math.min(vt-(land?6:22)-S.y,Math.round(H*(land?.2:.24))));const vt2=Math.min(vt,S.y+S.h+(land?6:22));vh=btm-vt2;
