@@ -218,12 +218,12 @@ function showResult(g){try{clearTimeout(tipH);if(G)G.tips=[];}catch(e){}try{cons
  <div class="xpb"><i id="rXp" style="width:${li0.cur/li0.need*100}%"></i><span id="rXpT">+0 ${T('xp')}</span></div>
  <div class="chips">${r.parts.filter(p=>p[1]>0).map(p=>`<span>${T(p[0])} <b>+${Math.round(p[1]*r.m)}</b></span>`).join('')}<span class="cc">${coinSvg}<b>+${r.coins}</b></span></div>
  <div class="newrow" id="rNew"></div>
- <button class="btn green big" id="rGo">${T('cont')}</button>
- <div class="row4"><button class="btn blue sm" id="rRe">${T('retry')}</button><button class="btn gold sm" id="rGar">${T('garage')}</button><button class="btn gold sm" id="rMap">${T('map')}</button>${done?'':`<button class="btn pink sm" id="rDbl"><svg class="ad" viewBox="0 0 24 24"><use href="#i-play"/></svg>${T('dbl')}</button>`}</div></div>
+ <div class="row2"><button class="btn green big" id="rGo">${T('cont')}</button>${done?'':`<button class="btn pink sm" id="rDbl"><svg class="ad" viewBox="0 0 24 24"><use href="#i-play"/></svg>${T('dbl')}</button>`}</div>
+ <div class="row4"><button class="btn blue sm" id="rRe">${T('retry')}</button><button class="btn gold sm" id="rGar">${T('garage')}</button><button class="btn gold sm" id="rMap">${T('map')}</button></div></div>
  <div class="tapsp">${T('tapSkip')}</div>`;
  let h3=null;if(UI3()){const f=FAM[ch]||FAM[1];h3=R3.ui.res({ch,stars:r.stars,types:types.map(ty=>[ty,tierOf(ty)]),img:{im:IMG('img/'+f[0]+'.jpg'),crop:[f[1],f[2],f[3]]},label:`${T('saved')} ${r.people}/${r.people}`});OV.h3=h3;}
  const cvs=$('rcv'),ps=PS();let T0=0,spd=1;const st=[0,0,0];let medalOn=false,xpDone=false,fwT=0;AU.win();
- el.onpointerdown=e=>{if(e.target.closest('button'))return;spd=8;};
+ el.onpointerdown=e=>{if(e.target.closest('button'))return;spd=8;};try{el.querySelector('.chips').onclick=e=>{e.currentTarget.classList.toggle('open');};}catch(e){}
  const bc=$('rbadge').getContext('2d');const drawB=rk=>{if(UI3()&&R3.ui.badge(bc,96,rk))return;bc.clearRect(0,0,96,96);rankBadge(bc,48,48,40,rk);};drawB(rankOf(li0.L));
  const anXp=(from,to,dur,cb)=>{let t=0;const lab=$('rXpT');const step=()=>{if(!document.body.contains(lab))return;t+=1/60*spd;const u=Math.min(1,t/dur);const v=from+(to-from)*E.out(u);const li=lvlInfo(v);
    $('rXp').style.width=(li.cur/li.need*100)+'%';$('rLv').textContent=T('lvl')+' '+li.L;lab.textContent='+'+Math.round(v-from+(xpBase))+' '+T('xp');const rk=rankOf(li.L);if($('rRank').dataset.rk!=rk){$('rRank').dataset.rk=rk;$('rRank').textContent=T('rk'+(rk+1));drawB(rk);}
