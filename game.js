@@ -111,15 +111,7 @@ const AU={ac:null,m:null,s:null,next:0,step:0,roar:null,sirenUntil:0,nb:null,
  setSound(on){SAVE.snd=on?1:0;persist();if(this.s)this.s.gain.setTargetAtTime(on?.55:0,this.ac.currentTime,.05);},
  setMusic(on){SAVE.mus=on?1:0;persist();if(this.m)this.m.gain.setTargetAtTime(on?.11:0,this.ac.currentTime,.1);},
  mood:'tense',
- music(){if(!this.ac)return;const bpm=this.mood==='hero'?120:132,st=60/bpm/2;const now=this.ac.currentTime;if(this.next<now)this.next=now+.05;
-  const tense={mel:[69,0,72,0,76,0,72,0,65,0,69,0,72,0,69,0,67,0,71,0,74,0,71,0,64,0,68,0,71,0,76,0],bass:[45,45,41,41,43,43,40,40]};
-  const hero={mel:[72,0,72,76,79,0,76,0,77,0,81,0,79,0,76,74,72,0,76,79,84,0,83,81,79,0,77,76,74,0,72,0],bass:[48,48,53,53,55,55,48,48]};
-  while(this.next<now+.25){const P=this.mood==='hero'?hero:tense;const s=this.step%32;const t0=this.next-now;
-   if(P.mel[s])this.tone(440*Math.pow(2,(P.mel[s]-69)/12),st*1.5,this.mood==='hero'?'square':'triangle',this.mood==='hero'?.12:.3,0,t0,this.m);
-   if(s%4===0)this.tone(440*Math.pow(2,(P.bass[(s/4)%8]-69)/12),st*3.6,'sawtooth',.18,0,t0,this.m);
-   if(s%4===0)this.tone(70,.12,'sine',.32,40,t0,this.m);
-   if(s%2===1)this.noise(.03,7000,.04,t0,'highpass',this.m);
-   this.next+=st;this.step++;}}};
+ music(){}};// v21: score lives in music.js
 // ---------- Helpers ----------
 const E={io:u=>.5-.5*Math.cos(Math.PI*u),out:u=>1-(1-u)*(1-u),in:u=>u*u,back:u=>{const c=1.7;return 1+(c+1)*Math.pow(u-1,3)+c*Math.pow(u-1,2);}};
 const lerp=(a,b,u)=>a+(b-a)*u, clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
