@@ -95,7 +95,7 @@ const STING={
 };
 const ZONE=[{tr:0,bpm:0,soft:0},{tr:2,bpm:4,soft:1},{tr:-3,bpm:-4,soft:0},{tr:3,bpm:6,soft:1},{tr:-2,bpm:2,soft:0},{tr:5,bpm:8,soft:1}];
 function mkState(key,t0,opt){opt=opt||{};const z=ZONE[(opt.zone||0)%ZONE.length];const def=TR[key];return{key,def,step:0,loop:0,nextT:t0,bpm:def?def.bpm+(key==='game'?z.bpm:0):100,tr:key==='game'?z.tr:0,soft:z.soft,lv:opt.lv||(()=>0)};}
-function run(E,d,st,until){let n=0;while(st.nextT<until&&n<256){st.def.step(E,d,st.nextT,st.step,st);st.nextT+=60/st.bpm/4;st.step++;if(st.step%(16*(st.key==='boss'?8:16))===0)st.loop++;n++;}}
+function run(E,d,st,until,cap){let n=0;cap=cap||256;while(st.nextT<until&&n<cap){st.def.step(E,d,st.nextT,st.step,st);st.nextT+=60/st.bpm/4;st.step++;if(st.step%(16*(st.key==='boss'?8:16))===0)st.loop++;n++;}}
 // ---------- live player ----------
 const M=window.MUS={E:null,st:null,tg:null,key:null,duck:null,TR,STING,Eng,mkState,run,ZONE};
 function want(){if(typeof SAVE==='undefined'||!SAVE.mus)return null;const m=typeof MODE!=='undefined'?MODE:'';
