@@ -467,7 +467,7 @@ function showMap(){G=null;parts.length=0;const m=$('map');const unlocked=SAVE.st
  const c=m.querySelector('.node.cur');if(c)setTimeout(()=>c.scrollIntoView({block:'center'}),30);}
 function settings(){const p=$('pop');p.style.display='flex';const opts=['auto',...Object.keys(I18N)].map(l=>`<option value="${l}" ${((l==='auto'&&!localStorage.getItem('ft_lang'))||localStorage.getItem('ft_lang')===l)?'selected':''}>${l==='auto'?T('auto'):LANG_NAMES[l]}</option>`).join('');
  p.innerHTML=`<div class="card"><h2>${T('settings')}</h2><div class="set">${T('sound')}<button class="tg ${SAVE.snd?'on':''}" id="sSnd"></button></div><div class="set">${T('music')}<button class="tg ${SAVE.mus?'on':''}" id="sMus"></button></div><div class="set">${T('language')}<select id="sLang">${opts}</select></div>
- <div class="cred">${T('credits')}<img src="studio-logo.png" alt="">P-Prece Studio<br>พีพีช Studio</div><button class="btn green" id="sClose">${T('close')}</button></div>`;
+ <a class="priv" href="privacy.html?lang=${LANG}" target="_blank" rel="noopener">${T('privacy')}</a><div class="cred">${T('credits')}<img src="studio-logo.png" alt="">P-Prece Studio<br>พีพีช Studio</div><button class="btn green" id="sClose">${T('close')}</button></div>`;
  $('sSnd').onclick=e=>{AU.init();AU.setSound(!SAVE.snd);e.target.classList.toggle('on',!!SAVE.snd);AU.click();};
  $('sMus').onclick=e=>{AU.init();AU.setMusic(!SAVE.mus);e.target.classList.toggle('on',!!SAVE.mus);};
  $('sLang').onchange=e=>{const v=e.target.value;try{if(v==='auto')localStorage.removeItem('ft_lang');else localStorage.setItem('ft_lang',v);}catch(_){}LANG=v==='auto'?detectLang():v;applyLang();settings();};

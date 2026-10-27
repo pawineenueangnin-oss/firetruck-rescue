@@ -8,6 +8,9 @@ const css=`
 #hud .bottom{bottom:calc(6px + var(--banner,0px) + env(safe-area-inset-bottom));gap:8px;padding:0 8px}
 #hud .top{top:calc(6px + env(safe-area-inset-top));left:calc(6px + env(safe-area-inset-left));right:calc(6px + env(safe-area-inset-right))}
 #hud .fire{top:calc(var(--ftop,200px))}
+#pop .card{max-height:calc(100dvh - 16px);overflow-y:auto;-webkit-overflow-scrolling:touch}.priv{display:block;text-align:center;margin:8px 0 2px;color:#9fd0ff;font-size:13px;font-weight:800;text-decoration:underline}
+#lvl{flex-shrink:0;min-width:max-content}.tapsp{white-space:normal;line-height:1.15;max-width:40vw;text-overflow:clip}#rDbl{font-size:clamp(11px,3.5vw,15px);line-height:1.1}.tool .tl{font-size:inherit;letter-spacing:-.2px}
+@media (max-width:380px){#lvl{font-size:13px;padding:5px 8px}.pill{padding:5px 8px}}
 @media (max-width:340px){.tool{padding:0 7px;font-size:11.5px;gap:3px}.tool .ic{width:18px;height:18px}}
 @media (orientation:landscape) and (max-height:500px){#hud .bottom{left:auto;right:calc(6px + env(safe-area-inset-right));flex-direction:column;align-items:stretch;width:118px;bottom:calc(8px + var(--banner,0px) + env(safe-area-inset-bottom))}.tool{flex:none}
  #hud .fire{top:calc(8px + env(safe-area-inset-top))}}
@@ -40,3 +43,6 @@ if(screen.orientation&&screen.orientation.addEventListener)screen.orientation.ad
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(G)layout();});
 if(G)layout();
 })();
+// v22: auto-fit long translated labels (tool buttons, reward button, level pill)
+(function(){function fit(){document.querySelectorAll('.tool .tl,#rDbl,#lvl,.pill').forEach(e=>{if(!e.offsetParent)return;e.style.fontSize='';let f=parseFloat(getComputedStyle(e).fontSize),n=0;const box=e.classList.contains('tl')?e.parentElement:e;while(n++<10&&f>8.5&&box.scrollWidth>box.clientWidth+1){f-=.75;e.style.fontSize=f+'px';}});}
+window.FT_FIT=fit;let q=0;const k=()=>{if(q)return;q=1;requestAnimationFrame(()=>{q=0;fit();});};addEventListener('resize',k);document.addEventListener('click',()=>setTimeout(k,60),true);setInterval(()=>{if(!document.hidden)k();},1500);new MutationObserver(k).observe(document.body,{subtree:true,childList:true,characterData:true});})();
