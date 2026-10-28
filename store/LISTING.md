@@ -1,15 +1,17 @@
-# Firetruck Rescue — Google Play listing (v22 draft)
+# Hose & Ladder: Road Rescue — Google Play listing (v23 draft; formerly "Firetruck Rescue")
 
 Developer: **P-Prece Studio** (พีพีช Studio) · Suggested package id: `th.firetruckrescue.game`
 Privacy policy URL: https://pawineenueangnin-oss.github.io/firetruck-rescue/privacy.html
 
 ## English (en-US)
-**Title (≤30):** Firetruck Rescue: Road Puzzle  *(28 chars)*
+**Title (≤30):** Hose & Ladder: Road Rescue  *(26 chars)*
 
-**Short description (≤80):** Clear the traffic so fire trucks can reach the fire and rescue everyone!  *(73 chars)*
+**Short description (≤80):** A fire truck rescue puzzle: clear the traffic so the trucks reach the fire!  *(75 chars)*
 
 **Full description (≤4000):**
 ```
+Hose & Ladder: Road Rescue – a fire truck rescue puzzle for the whole family.
+
 Sirens on! The city needs you. Fires, car crashes and kittens stuck in trees – every call is a race against time, but the streets are jammed with cars. Tap the vehicles to drive them out of the way and open a path for the fire engines, ladder trucks, tow trucks and ambulances.
 
 HOW TO PLAY
@@ -31,11 +33,14 @@ FEATURES
 FAMILY FRIENDLY
 Made for kids and grown-ups. No chat, no personal data collected, no in-app purchases. Ads are child-safe and non-personalised; bonus videos are always optional.
 
-Made with love by P-Prece Studio.
+Made with love by P-Prece Studio. Open-source credits (three.js – MIT, Noto Sans Thai Looped – SIL OFL 1.1) are in Settings → Licences.
 ```
 
-**What's new (v22):**
+**What's new (v23):**
 ```
+• New name: Hose & Ladder: Road Rescue
+• New green ambulance emblem
+• Credits & open-source licences screen in Settings
 • Brand-new original soundtrack with menu, story and boss music
 • Bigger game board and smaller buttons – fits every phone and tablet, portrait or landscape
 • Long translations now fit on small screens
@@ -43,12 +48,14 @@ Made with love by P-Prece Studio.
 ```
 
 ## ภาษาไทย (th-TH)
-**ชื่อ (≤30):** รถดับเพลิงกู้ภัย: ปริศนาถนน  *(26 ตัวอักษร)*
+**ชื่อ (≤30):** สายฉีดกับบันได: กู้ภัยบนถนน  *(27 ตัวอักษร; อังกฤษ: Hose & Ladder: Road Rescue)*
 
-**คำอธิบายสั้น (≤80):** เคลียร์รถติดให้รถดับเพลิงไปถึงที่เกิดเหตุ ช่วยทุกคนให้ปลอดภัย!  *(61 ตัวอักษร)*
+**คำอธิบายสั้น (≤80):** เกมปริศนากู้ภัยรถดับเพลิง เคลียร์รถติดให้รถดับเพลิงไปถึงที่เกิดเหตุทันเวลา!  *(75 ตัวอักษร)*
 
 **คำอธิบายเต็ม:**
 ```
+Hose & Ladder: Road Rescue (สายฉีดกับบันได: กู้ภัยบนถนน) เกมปริศนากู้ภัยรถดับเพลิงสำหรับทั้งครอบครัว
+
 เปิดไซเรน! เมืองต้องการคุณ ไฟไหม้ รถชน และลูกแมวติดต้นไม้ ทุกภารกิจต้องแข่งกับเวลา แต่ถนนเต็มไปด้วยรถ แตะรถเพื่อขับออกไปและเปิดทางให้รถดับเพลิง รถกระเช้า รถลาก และรถพยาบาล
 
 วิธีเล่น
@@ -70,11 +77,14 @@ Made with love by P-Prece Studio.
 เหมาะกับครอบครัว
 ไม่มีแชต ไม่เก็บข้อมูลส่วนตัว ไม่มีการซื้อในแอป โฆษณาปลอดภัยสำหรับเด็กและไม่ปรับตามบุคคล วิดีโอรับรางวัลกดดูเองเท่านั้น
 
-สร้างด้วยใจโดย พีพีช Studio (P-Prece Studio)
+สร้างด้วยใจโดย พีพีช Studio (P-Prece Studio) เครดิตโอเพนซอร์ส (three.js – MIT, Noto Sans Thai Looped – SIL OFL 1.1) ดูได้ที่ ตั้งค่า → สัญญาอนุญาต
 ```
 
-**มีอะไรใหม่ (v22):**
+**มีอะไรใหม่ (v23):**
 ```
+• ชื่อใหม่: Hose & Ladder: Road Rescue
+• สัญลักษณ์รถพยาบาลใหม่เป็นกากบาทสีเขียว
+• หน้าเครดิตและสัญญาอนุญาตโอเพนซอร์สในเมนูตั้งค่า
 • ดนตรีประกอบใหม่ทั้งหมด (เมนู เนื้อเรื่อง บอส)
 • กระดานใหญ่ขึ้น ปุ่มเล็กลง ปรับพอดีทุกหน้าจอ ทั้งแนวตั้งและแนวนอน
 • ข้อความภาษาต่าง ๆ ไม่ล้นจอเล็กอีกต่อไป

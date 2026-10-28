@@ -304,7 +304,7 @@ window.endStory=function(){if(MODE!=='story')return;seqFinish();};
 window.storyUpd=function(){};
 window.chapterCard=function(ch,cb){playSeq('c'+ch,cb);};
 function showCredits(){$('cap').classList.remove('on');$('bSkip').style.display='none';const c=$('credits');c.style.display='flex';
- c.innerHTML=`<div class="crroll"><div class="te">${T('theEnd')}</div><img src="studio-logo.png" alt=""><div class="sn">P-Prece Studio</div><div class="snt">พีพีช Studio</div><div class="mb">${T('credits')} P-Prece Studio</div><div class="ty">${T('thanks')}</div>
+ c.innerHTML=`<div class="crroll"><div class="te">${T('theEnd')}</div><img src="studio-logo.png" alt=""><div class="sn">P-Prece Studio</div><div class="snt">พีพีช Studio</div><div class="mb">${T('credits')} P-Prece Studio</div><div class="mb" style="font-size:.72em;opacity:.85">three.js (MIT) · Noto Sans Thai Looped (SIL OFL 1.1)</div><div class="ty">${T('thanks')}</div>
  <div class="row"><button class="btn blue" id="crRe">${T('replay')}</button><button class="btn gold" id="crMap">${T('map')}</button></div><button class="btn green" id="crEnd">${T('endlessGo')}</button></div>`;
  confetti();AU.win();$('crRe').onclick=()=>{AU.click();playEnding();};$('crMap').onclick=()=>{AU.click();SQ.seq=null;c.style.display='none';showMap();};$('crEnd').onclick=()=>{AU.click();SQ.seq=null;c.style.display='none';startLevel(30);};}
 window.playEnding=function(){SAVE.seen.ending=1;persist();playSeq('ending',()=>showMap());};

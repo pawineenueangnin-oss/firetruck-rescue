@@ -27,8 +27,8 @@ function side(kind){if(sideTex[kind])return sideTex[kind];const W=kind==='door'?
   g.font='900 26px sans-serif';g.fillStyle='rgba(255,255,255,.95)';g.textAlign='left';g.fillText('RESCUE · 7',20,72);}
  if(kind==='door'){emblem(g,128,78,62,'#9a0e14');g.fillStyle='#fff';g.strokeStyle='rgba(60,0,0,.8)';g.lineWidth=6;g.font='900 46px sans-serif';g.textAlign='center';g.strokeText('7',128,176);g.fillText('7',128,176);g.fillStyle='rgba(0,0,0,.4)';g.fillRect(10,6,3,180);g.fillRect(232,100,22,6);}
  if(kind==='amb'){g.fillStyle='#d4161c';g.fillRect(0,78,W,18);g.fillStyle='#ff8a1e';g.fillRect(0,98,W,6);g.fillStyle='#1d56c8';g.fillRect(0,40,W*.62,6);
-  const cx=W*.36,cy=50;g.fillStyle='#d4161c';g.fillRect(cx-9,cy-28,18,56);g.fillRect(cx-28,cy-9,56,18);g.fillStyle='#fff';g.fillRect(cx-5,cy-24,10,48);g.fillRect(cx-24,cy-5,48,10);
-  seam(W-150,14,112);seam(W*.72,14,112);g.fillStyle='#1d3f9a';g.font='800 22px sans-serif';g.textAlign='left';g.fillText('MEDIC 7',W*.47,70);}
+  const cx=W*.36,cy=50;g.fillStyle='#fff';g.fillRect(cx-11,cy-30,22,60);g.fillRect(cx-30,cy-11,60,22);g.fillStyle='#14a046';g.fillRect(cx-8,cy-27,16,54);g.fillRect(cx-27,cy-8,54,16);
+  seam(W-150,14,112);seam(W*.72,14,112);g.fillStyle='#1d3f9a';g.font='800 22px sans-serif';g.textAlign='left';g.fillText('AMBULANCE',W*.47,70);}
  if(kind==='police'){g.fillStyle='#1d3f9a';g.fillRect(0,64,W,30);g.fillStyle='#ffffff';g.fillRect(0,94,W,5);g.fillStyle='#fff';g.font='900 26px sans-serif';g.textAlign='center';g.fillText('PATROL',W/2,88);seam(W*.5,8,120);seam(W*.24,8,120);}
  if(kind==='van'){chevron(g,0,80,W,16,'#1a1a1e','#ffd23f');seam(W*.62,10,118);g.fillStyle='#1a1a1e';g.font='800 22px sans-serif';g.textAlign='left';g.fillText('CITY WORKS',22,62);}
  if(kind==='tow'){chevron(g,0,84,W,14,'#1a1a1e','#ffd23f');seam(W-130,10,118);g.fillStyle='#1a1a1e';g.font='900 24px sans-serif';g.textAlign='left';g.fillText('TOW 24/7',20,64);}

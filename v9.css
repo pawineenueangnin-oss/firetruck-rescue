@@ -55,3 +55,4 @@ body:has(.lvup.rank) #toast{opacity:0!important}
 .row2{display:flex;gap:6px;margin-top:6px;align-items:stretch}.row2 #rGo{flex:1.4 1 0;margin:0;padding:10px 6px;font-size:22px!important;min-width:0}
 .row2 #rDbl{flex:1 1 0;order:0;margin:0;font-size:14px!important;padding:8px 4px;border-radius:14px;min-width:0}
 .row4{margin-top:5px}.row4 .btn{padding:7px 4px;font-size:13px!important}
+.logo .l1{font-size:.7em;white-space:nowrap}.logo .l2{font-size:.92em;white-space:nowrap}

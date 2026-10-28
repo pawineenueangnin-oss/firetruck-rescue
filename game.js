@@ -1,4 +1,4 @@
-// Firetruck Rescue — original game by P-Prece Studio (พีพีช Studio). All art is procedural canvas drawing; all sound is WebAudio synthesis.
+// Hose & Ladder: Road Rescue (formerly "Firetruck Rescue") — original game by P-Prece Studio (พีพีช Studio). All art is procedural canvas drawing; all sound is WebAudio synthesis.
 'use strict';
 const $=id=>document.getElementById(id);
 const cv=$('c'),cx=cv.getContext('2d');
@@ -45,7 +45,7 @@ window.FT_AD_UNITS=window.FT_AD_UNITS||{
  if(document.body)ui();else document.addEventListener('DOMContentLoaded',ui);})();
 try{window.AndroidAds&&AndroidAds.configure&&AndroidAds.configure(JSON.stringify(window.FT_AD_UNITS));}catch(e){}
 const BANNER=()=>(window.AndroidAds&&window.AndroidAds.showBanner?56:0);
-const LOG=(...a)=>{try{console.log('[FiretruckRescue]',...a);}catch(e){}};
+const LOG=(...a)=>{try{console.log('[HoseLadder]',...a);}catch(e){}};
 const FL=FTLogic;
 // ---------- Save ----------
 const SAVE=(()=>{let s={};try{s=JSON.parse(localStorage.getItem('ft_save')||'{}');}catch(e){}
@@ -452,7 +452,7 @@ function endPopup(winb){const p=$('pop');p.style.display='flex';const g=G;let h=
 function chapterCard(ch,cb){setMode('card');const p=$('pop');p.style.display='flex';p.innerHTML=`<div class="chcard"><canvas id="ccv" width="440" height="220"></canvas><div class="k">${T('chapter')} ${ch}</div><h3>${T('c'+ch)}</h3><p>${T('c'+ch+'d')}</p><button class="btn green" id="cGo">${T('play')}</button></div>`;
  AU.bell(.6);const c=$('ccv'),g=c.getContext('2d'),t0=performance.now();(function a(){if(!document.body.contains(c))return;const t=(performance.now()-t0)/1000;g.setTransform(2,0,0,2,0,0);g.clearRect(0,0,220,110);drawScene(g,ch,0,0,220,110,t,.7,{waiting:3});requestAnimationFrame(a);})();
  $('cGo').onclick=()=>{AU.click();p.style.display='none';cb();};}
-function showTitle(){G=null;const t=$('title');t.innerHTML=`<button class="rb green corner" id="tSet" aria-label="settings"><svg><use href="#i-gear"/></svg></button><div class="logo"><span class="l1" data-x="Firetruck">Firetruck</span><span class="l2" data-x="Rescue">Rescue</span></div><div class="tag">${T('tag')}</div><button class="btn green big" id="tPlay">${T('play')}</button><button class="btn blue" id="tStory">${T('story')}</button>`;
+function showTitle(){G=null;const t=$('title');t.innerHTML=`<button class="rb green corner" id="tSet" aria-label="settings"><svg><use href="#i-gear"/></svg></button><div class="logo"><span class="l1" data-x="Hose &amp; Ladder">Hose &amp; Ladder</span><span class="l2" data-x="Road Rescue">Road Rescue</span></div><div class="tag">${T('tag')}</div><button class="btn green big" id="tPlay">${T('play')}</button><button class="btn blue" id="tStory">${T('story')}</button>`;
  $('tPlay').onclick=()=>{AU.init();AU.click();if(!SAVE.seen.story)startStory();else showMap();};$('tStory').onclick=()=>{AU.init();AU.click();startStory();};$('tSet').onclick=()=>{AU.init();settings();};setMode('title');}
 function showMap(){G=null;parts.length=0;const m=$('map');const unlocked=SAVE.stars.filter(x=>x>0).length;const N=window.FTX&&unlocked>=30?Math.max(30,unlocked+4):30;const cur=Math.min(unlocked,N-1);const tot=SAVE.stars.reduce((a,b)=>a+(b||0),0);
  let h=`<div class="mhead"><button class="rb green" id="mBack" aria-label="title"><svg><use href="#i-home"/></svg></button><div class="pill">${T('map')}</div><div class="pill tot"><svg viewBox="0 0 24 24"><use href="#i-star"/></svg>${tot}/${N*3}</div><button class="rb green" id="mSet" aria-label="settings"><svg><use href="#i-gear"/></svg></button></div><div class="path" id="mpath">`;
@@ -467,11 +467,11 @@ function showMap(){G=null;parts.length=0;const m=$('map');const unlocked=SAVE.st
  const c=m.querySelector('.node.cur');if(c)setTimeout(()=>c.scrollIntoView({block:'center'}),30);}
 function settings(){const p=$('pop');p.style.display='flex';const opts=['auto',...Object.keys(I18N)].map(l=>`<option value="${l}" ${((l==='auto'&&!localStorage.getItem('ft_lang'))||localStorage.getItem('ft_lang')===l)?'selected':''}>${l==='auto'?T('auto'):LANG_NAMES[l]}</option>`).join('');
  p.innerHTML=`<div class="card"><h2>${T('settings')}</h2><div class="set">${T('sound')}<button class="tg ${SAVE.snd?'on':''}" id="sSnd"></button></div><div class="set">${T('music')}<button class="tg ${SAVE.mus?'on':''}" id="sMus"></button></div><div class="set">${T('language')}<select id="sLang">${opts}</select></div>
- <a class="priv" href="privacy.html?lang=${LANG}" target="_blank" rel="noopener">${T('privacy')}</a><div class="cred">${T('credits')}<img src="studio-logo.png" alt="">P-Prece Studio<br>พีพีช Studio</div><button class="btn green" id="sClose">${T('close')}</button></div>`;
+ <a class="priv" href="privacy.html?lang=${LANG}" target="_blank" rel="noopener">${T('privacy')}</a><a class="priv" href="#" id="sLic">${licT('b')}</a><div class="cred">${T('credits')}<img src="studio-logo.png" alt="">P-Prece Studio<br>พีพีช Studio</div><button class="btn green" id="sClose">${T('close')}</button></div>`;
  $('sSnd').onclick=e=>{AU.init();AU.setSound(!SAVE.snd);e.target.classList.toggle('on',!!SAVE.snd);AU.click();};
  $('sMus').onclick=e=>{AU.init();AU.setMusic(!SAVE.mus);e.target.classList.toggle('on',!!SAVE.mus);};
  $('sLang').onchange=e=>{const v=e.target.value;try{if(v==='auto')localStorage.removeItem('ft_lang');else localStorage.setItem('ft_lang',v);}catch(_){}LANG=v==='auto'?detectLang():v;applyLang();settings();};
- $('sClose').onclick=()=>{AU.click();p.style.display='none';if(MODE==='title')showTitle();else if(MODE==='map')showMap();};}
+ $('sLic').onclick=e=>{e.preventDefault();AU.click();showLicenses();};$('sClose').onclick=()=>{AU.click();p.style.display='none';if(MODE==='title')showTitle();else if(MODE==='map')showMap();};}
 function applyLang(){document.documentElement.lang=LANG;document.documentElement.dir=LANG==='ar'?'rtl':'ltr';document.querySelectorAll('[data-t]').forEach(e=>e.textContent=T(e.dataset.t));$('bSkip').textContent=T('skip');updHUD();}
 // ---------- Story ----------
 const STORY={t:0,scene:0,dur:5.2,n:5,cue:{}};

@@ -288,7 +288,7 @@ function init(){
   const pl=new THREE.Mesh(new THREE.BoxGeometry(.4,.1,.5),SM(0xffffff));pl.position.set(-.75,.9,0);s.add(pl);
   [[-.8,-.25],[-.8,.25],[.8,-.25],[.8,.25]].forEach(([a,b])=>{const l=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,.75,6),fr);l.position.set(a,.38,b);s.add(l);const w=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,.05,10),SM(0x222222));w.rotation.x=Math.PI/2;w.position.set(a,.07,b);s.add(w);});
   s.position.set(x,0,z);s.rotation.y=ry||0;g.add(s);return s;}
- function medkit(g,x,z){const b=new THREE.Mesh(new THREE.BoxGeometry(.6,.4,.3),SM(0xf4f4f4,{roughness:.4}));b.position.set(x,.2,z);b.castShadow=true;g.add(b);const r=SM(0xe0202a);[[.32,.08],[.08,.32]].forEach(([w,h])=>{const c=new THREE.Mesh(new THREE.BoxGeometry(w,h,.02),r);c.position.set(x,.22,z+.16);g.add(c);});}
+ function medkit(g,x,z){const b=new THREE.Mesh(new THREE.BoxGeometry(.6,.4,.3),SM(0xf4f4f4,{roughness:.4}));b.position.set(x,.2,z);b.castShadow=true;g.add(b);const r=SM(0x14a046);[[.32,.08],[.08,.32]].forEach(([w,h])=>{const c=new THREE.Mesh(new THREE.BoxGeometry(w,h,.02),r);c.position.set(x,.22,z+.16);g.add(c);});}
  function warnTri(g,x,z){const t=new THREE.Mesh(new THREE.TorusGeometry(.32,.05,4,3),new THREE.MeshStandardMaterial({color:0xff2020,emissive:0x601010,roughness:.3}));t.position.set(x,.36,z);t.rotation.z=Math.PI/2;g.add(t);}
  function treeBig(g){const bark=SM(0x5a3a22,{roughness:1}),leaf=[SM(0x2e7a34,{roughness:.9,flatShading:true}),SM(0x3a9440,{roughness:.9,flatShading:true}),SM(0x24622a,{roughness:.9,flatShading:true})];const ends=[];
   const tr=new THREE.Mesh(new THREE.CylinderGeometry(.5,.95,7.5,12),bark);tr.position.y=3.75;tr.castShadow=true;g.add(tr);
